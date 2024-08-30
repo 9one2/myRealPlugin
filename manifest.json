@@ -1,0 +1,8 @@
+{
+  "name": "My Real Plugin",
+  "id": "1405367309337293161",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "ui": "code.js"
+}

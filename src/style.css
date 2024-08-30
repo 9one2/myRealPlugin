@@ -1,0 +1,96 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+body { font-family: 'Pretendard'; padding: 20px; }
+input, textarea, button { width: 100%; margin-bottom: 10px; }
+#pluginList { margin-top: 20px; }
+.plugin-item { 
+  border: 1px solid #ccc; 
+  padding: 10px; 
+  margin-bottom: 10px; 
+  display: flex; 
+  align-items: flex-start;
+  align-items: center; 
+  cursor: pointer;
+  border-radius: 8px;
+}
+.plugin-item:hover {
+  background-color: #f0f0f0;
+}
+.plugin-item img { width: 40px; height: 40px; margin-right: 10px; border: 1px solid #e7e7e7; display: flex; }
+.plugin-info { flex-grow: 1; }
+.plugin-actions { 
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width:40px; }
+
+.pluginUrl {padding: 12px;}
+
+.myTitle {
+  background-color: #e7e7e7; 
+  padding: 16px 12px; 
+  border-radius: 8px; 
+  text-align: center;
+  font-weight: 500;
+}
+.inputUrl, .inputcategory, .inputDesc {
+  padding: 12px; 
+  border-radius: 8px; 
+  border: 1.5px solid #ddd;
+  font-family: "Pretendard";
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+}
+.btnAdd {
+  padding:12px;
+  border: none; 
+  background-color: coral; 
+  color: #fff; 
+  font-weight: 600; 
+  font-size: 14px; 
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+.tab {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 2px solid #ddd;
+  width:50%;
+  text-align: center;
+}
+.active-tab {
+  font-weight: bold;
+  border-bottom: 2px solid coral;
+  color: coral;
+}
+.content {
+  display: none;
+}
+.content.active {
+  display: block;
+}
+.chip {
+  display: inline-block;
+  padding: 5px 10px;
+  margin: 5px;
+  background-color: #E5E5E5;
+  border-radius: 16px;
+  cursor: pointer;
+}
+.chip.active {
+  background-color: coral;
+  color: white;
+}
