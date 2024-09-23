@@ -1,96 +1,193 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
-body { font-family: 'Pretendard'; padding: 20px; }
-input, textarea, button { width: 100%; margin-bottom: 10px; }
-#pluginList { margin-top: 20px; }
-.plugin-item { 
-  border: 1px solid #ccc; 
-  padding: 10px; 
-  margin-bottom: 10px; 
-  display: flex; 
-  align-items: flex-start;
-  align-items: center; 
-  cursor: pointer;
-  border-radius: 8px;
-}
-.plugin-item:hover {
-  background-color: #f0f0f0;
-}
-.plugin-item img { width: 40px; height: 40px; margin-right: 10px; border: 1px solid #e7e7e7; display: flex; }
-.plugin-info { flex-grow: 1; }
-.plugin-actions { 
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width:40px; }
+    body { 
+      font-family: 'Pretendard'; 
+      margin: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .content-wrapper {
+      padding: 20px;
+      height: calc(100% - 40px); 
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    input, textarea { width: 100%; margin-bottom: 10px; }
 
-.pluginUrl {padding: 12px;}
+    #pluginList { 
+      margin-top: 20px; 
+      flex-grow: 1;
+      overflow-y: auto;
+      min-width: 400px;
+    }
+    .plugin-item { 
+      border: 2px solid #f0f3f7;
+      padding: 16px 8px 16px 16px; 
+      margin-bottom: 12px; 
+      display: flex; 
+      align-items: flex-start;
+      cursor: pointer;
+      border-radius: 12px;
+      flex-wrap: wrap;
+    }
+    .plugin-item:hover {
+      background-color: #f0f3f7;
+    }
+    .plugin-item img { width: 40px; height: 40px; margin-right: 12px; display: flex; border-radius: 999px; margin-top: 4px;}
+    .plugin-info { 
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1; 
+      min-width: 200px;
+      gap: 16px;
+    }
 
-.myTitle {
-  background-color: #e7e7e7; 
-  padding: 16px 12px; 
-  border-radius: 8px; 
-  text-align: center;
-  font-weight: 500;
-}
-.inputUrl, .inputcategory, .inputDesc {
-  padding: 12px; 
-  border-radius: 8px; 
-  border: 1.5px solid #ddd;
-  font-family: "Pretendard";
-}
+    .plugin-actions { 
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 40px;
+    }
 
-.inputs {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    .pluginUrl {padding: 12px;}
 
-}
-.btnAdd {
-  padding:12px;
-  border: none; 
-  background-color: coral; 
-  color: #fff; 
-  font-weight: 600; 
-  font-size: 14px; 
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    .myTitle {
+      background-color: #f8e8e2; 
+      padding: 16px 12px; 
+      border-radius: 8px; 
+      text-align: center;
+      font-weight: 500;
+      color: coral;
+    }
+    .inputUrl, .inputcategory, .inputDesc {
+      padding: 12px; 
+      border-radius: 8px; 
+      border: 1.5px solid #ddd;
+      font-family: "Pretendard";
+    }
 
-#tabs {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
-}
-.tab {
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 2px solid #ddd;
-  width:50%;
-  text-align: center;
-}
-.active-tab {
-  font-weight: bold;
-  border-bottom: 2px solid coral;
-  color: coral;
-}
-.content {
-  display: none;
-}
-.content.active {
-  display: block;
-}
-.chip {
-  display: inline-block;
-  padding: 5px 10px;
-  margin: 5px;
-  background-color: #E5E5E5;
-  border-radius: 16px;
-  cursor: pointer;
-}
-.chip.active {
-  background-color: coral;
-  color: white;
-}
+    .inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .btnAdd {
+      padding: 12px;
+      border: none; 
+      background-color: coral; 
+      color: #fff; 
+      font-weight: 600; 
+      font-size: 14px; 
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .btnAdd:hover {
+      background-color: #df521f;
+      transition: ease-out 0.3s;
+    }
+
+    #tabs {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 2px solid #ddd;
+      width: 50%;
+      text-align: center;
+    }
+    .active-tab {
+      font-weight: bold;
+      border-bottom: 2px solid coral;
+      color: coral;
+    }
+    .content {
+      display: none;
+    }
+    .content.active {
+      display: block;
+    }
+    .chip {
+      display: inline-block;
+      padding: 5px 10px;
+      margin: 5px;
+      background-color: #E5E5E5;
+      border-radius: 16px;
+      cursor: pointer;
+    }
+    .chip.active {
+      background-color: coral;
+      color: white;
+    }
+    .delete-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .delete-button:hover {
+      background-color: #d0d3df;
+      border-radius: 6px;
+    }
+    #resizer {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 20px;
+      height: 20px;
+      cursor: se-resize;
+      background: linear-gradient(135deg, transparent 50%, #ccc 50%);
+    }
+    #categoryChips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .category-chip {
+      background-color: #E5E5E5;
+      border-radius: 16px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .category-chip.selected {
+      background-color: coral;
+      color: white;
+    }
+  
+    .autocomplete-wrapper {
+      position: relative;
+    }
+    .autocomplete-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 0 0 8px 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    .autocomplete-item {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .autocomplete-item:hover {
+      background-color: #f0f3f7;
+    }

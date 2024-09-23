@@ -1,8 +1,19 @@
 {
   "name": "My Real Plugin",
-  "id": "1405367309337293161",
+  "id": "1411371212812217200",
   "api": "1.0.0",
-  "main": "code.js",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
   "editorType": ["figma"],
-  "ui": "code.js"
+  "networkAccess": {
+    "allowedDomains": [
+      "https://cdn.jsdelivr.net",
+      "https://www.figma.com",
+      "https://unpkg.com",
+      "https://s3-alpha-sig.figma.com",
+      "https://s3-alpha.figma.com",
+      "https://api.airtable.com"
+    ]
+  },
+  "documentAccess": "dynamic-page"
 }
