@@ -388,6 +388,7 @@
       let existingCategories = [];
       let myPlugins = [];
       let searchTimeout;
+      let selectedPlugin = null; // 선택된 플러그인을 저장하는 변수 추가
   
       // 변수 선언
       const searchInput = document.getElementById('search-input');
@@ -657,239 +658,243 @@
         console.log('Requesting initial plugins list');
         parent.postMessage({ pluginMessage: { type: 'get-plugins' } }, '*');
       }
-          // code.ts로부터의 메시지 처리
-    window.onmessage = (event) => {
-      const message = event.data.pluginMessage;
-      if (message) {
-        console.log('Received message from plugin:', message);
-        if (message.type === 'plugins-list') {
-          renderPluginList(message.plugins);
-        } else if (message.type === 'search-results') {
+  
+      // code.ts로부터의 메시지 처리
+      window.onmessage = (event) => {
+        const message = event.data.pluginMessage;
+        if (message) {
+          console.log('Received message from plugin:', message);
+          if (message.type === 'plugins-list') {
+            renderPluginList(message.plugins);
+          } else if (message.type === 'search-results') {
+            hideLoadingSpinner();
+            renderSearchResults(message.results);
+          } else if (message.type === 'plugin-added') {
+            showToast('Plugin added successfully');
+            switchTab('plugin-list');
+          } else if (message.type === 'show-category-modal') {
+            showAddPluginModal(message.plugin);
+          }
+        }
+      };
+  
+      // 검색 기능
+      function performSearch() {
+        const query = searchInput.value.trim();
+        if (query.length >= 2) {
+          showLoadingSpinner();
+          parent.postMessage({ pluginMessage: { type: 'search-plugins', query } }, '*');
+        } else {
+          document.getElementById('search-results').innerHTML = '';
           hideLoadingSpinner();
-          renderSearchResults(message.results);
-        } else if (message.type === 'plugin-added') {
-          showToast('Plugin added successfully');
-          switchTab('plugin-list');
-        } else if (message.type === 'show-category-modal') {
-          showAddPluginModal(message.plugin);
         }
       }
-    };
-
-    // 검색 기능
-    function performSearch() {
-      const query = searchInput.value.trim();
-      if (query.length >= 2) {
-        showLoadingSpinner();
-        parent.postMessage({ pluginMessage: { type: 'search-plugins', query } }, '*');
-      } else {
+  
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(performSearch, 300);
+      });
+  
+      searchButton.addEventListener('click', performSearch);
+  
+      function showLoadingSpinner() {
+        document.getElementById('loading-spinner').style.display = 'flex';
         document.getElementById('search-results').innerHTML = '';
-        hideLoadingSpinner();
       }
-    }
-
-    searchInput.addEventListener('input', () => {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(performSearch, 300);
-    });
-
-    searchButton.addEventListener('click', performSearch);
-
-    function showLoadingSpinner() {
-      document.getElementById('loading-spinner').style.display = 'flex';
-      document.getElementById('search-results').innerHTML = '';
-    }
-
-    function hideLoadingSpinner() {
-      document.getElementById('loading-spinner').style.display = 'none';
-    }
-
-    function renderSearchResults(results) {
-      console.log('Displaying search results:', results);
-      const searchResultsContainer = document.getElementById('search-results');
-      searchResultsContainer.innerHTML = '';
-
-      if (results.length === 0) {
-        searchResultsContainer.innerHTML = '<p>No results found.</p>';
-        return;
+  
+      function hideLoadingSpinner() {
+        document.getElementById('loading-spinner').style.display = 'none';
       }
-
-      results.forEach(plugin => {
-        console.log('Processing plugin:', plugin);
-        const pluginElement = document.createElement('div');
-        pluginElement.className = 'plugin-item';
-
-        pluginElement.innerHTML = `
-          <div class="listWrap" style="display: flex; align-items: flex-start; flex-wrap: wrap; gap:8px; width:100%;">
-            <img src="${plugin.pluginIcon}" alt="${plugin.pluginName}" class="plugin-icon">
-            <div class="plugin-info" style="display: flex; flex-direction: column; flex-grow: 1; min-width: 200px; gap: 8px;">
-              <h3 style="margin:0;font-size: 18px; color: #3a3d51; font-weight: 300; width: 280px; white-space: nowrap; overflow: hidden; text-overflow:ellipsis;">${plugin.pluginName}</h3>
-              <p style="margin:0; font-size:13px; color: #96a1aa; width: 280px; white-space: nowrap; overflow: hidden; text-overflow:ellipsis;">${plugin.pluginDescription || 'No description available'}</p>
+  
+      function renderSearchResults(results) {
+        console.log('Displaying search results:', results);
+        const searchResultsContainer = document.getElementById('search-results');
+        searchResultsContainer.innerHTML = '';
+  
+        if (results.length === 0) {
+          searchResultsContainer.innerHTML = '<p>No results found.</p>';
+          return;
+        }
+  
+        results.forEach(plugin => {
+          console.log('Processing plugin:', plugin);
+          const pluginElement = document.createElement('div');
+          pluginElement.className = 'plugin-item';
+  
+          pluginElement.innerHTML = `
+            <div class="listWrap" style="display: flex; align-items: flex-start; flex-wrap: wrap; gap:8px; width:100%;">
+              <img src="${plugin.pluginIcon}" alt="${plugin.pluginName}" class="plugin-icon">
+              <div class="plugin-info" style="display: flex; flex-direction: column; flex-grow: 1; min-width: 200px; gap: 8px;">
+                <h3 style="margin:0;font-size: 18px; color: #3a3d51; font-weight: 300; width: 280px; white-space: nowrap; overflow: hidden; text-overflow:ellipsis;">${plugin.pluginName}</h3>
+                <p style="margin:0; font-size:13px; color: #96a1aa; width: 280px; white-space: nowrap; overflow: hidden; text-overflow:ellipsis;">${plugin.pluginDescription || 'No description available'}</p>
+              </div>
+              <button class="add-to-my-plugins" title="Add to My Plugins">
+                <i data-feather="plus-circle" stroke="#96a1aa" stroke-width="1.5"></i>
+              </button>
             </div>
-            <button class="add-to-my-plugins" title="Add to My Plugins">
-              <i data-feather="plus-circle" stroke="#96a1aa" stroke-width="1.5"></i>
-            </button>
-          </div>
-        `;
-
-        // 'Add to My Plugins' 버튼 클릭 핸들러 설정
-        pluginElement.querySelector('.add-to-my-plugins').addEventListener('click', (e) => {
-          e.stopPropagation();
-          // 플러그인 데이터를 메시지로 전달
-          parent.postMessage({
-            pluginMessage: {
-              type: 'add-plugin-from-search',
-              plugin: plugin
-            }
-          }, '*');
+          `;
+  
+          // 'Add to My Plugins' 버튼 클릭 핸들러 설정
+          pluginElement.querySelector('.add-to-my-plugins').addEventListener('click', (e) => {
+            e.stopPropagation();
+            // 선택된 플러그인을 저장
+            selectedPlugin = plugin;
+            // 플러그인 데이터를 메시지로 전달
+            parent.postMessage({
+              pluginMessage: {
+                type: 'add-plugin-from-search',
+                plugin: plugin
+              }
+            }, '*');
+          });
+  
+          // 플러그인 아이템 클릭 시 URL 이동
+          pluginElement.addEventListener('click', () => {
+            openPluginPage(plugin.id, plugin.pluginUrl);
+          });
+  
+          searchResultsContainer.appendChild(pluginElement);
         });
-
-        // 플러그인 아이템 클릭 시 URL 이동
-        pluginElement.addEventListener('click', () => {
-          openPluginPage(plugin.id, plugin.pluginUrl);
-        });
-
-        searchResultsContainer.appendChild(pluginElement);
-      });
-
-      feather.replace();
-    }
-
-    // Add Plugin Modal 표시
-    function showAddPluginModal(plugin) {
-      const modal = document.getElementById('add-plugin-modal');
-      document.getElementById('modal-plugin-name').value = plugin.pluginName;
-      document.getElementById('modal-plugin-url').value = plugin.pluginUrl;
-      document.getElementById('modal-plugin-description').value = plugin.pluginDescription || '';
-      document.getElementById('modal-plugin-category').value = '';
-      modal.style.display = 'block';
-    }
-
-    // Modal 닫기 핸들러
-    modalCloseButton.onclick = function () {
-      document.getElementById('add-plugin-modal').style.display = 'none';
-    }
-
-    window.onclick = function (event) {
-      const modal = document.getElementById('add-plugin-modal');
-      if (event.target == modal) {
-        modal.style.display = 'none';
+  
+        feather.replace();
       }
-    }
-
-    // Modal Add Plugin 버튼 클릭 핸들러
-    modalAddPluginButton.onclick = function () {
-      const name = document.getElementById('modal-plugin-name').value.trim();
-      const category = document.getElementById('modal-plugin-category').value.trim();
-      const description = document.getElementById('modal-plugin-description').value.trim();
-      const url = document.getElementById('modal-plugin-url').value.trim();
-      const pluginIcon = ''; // 아이콘 URL이 필요한 경우 추가
-
-      if (!name || !category || !url) {
-        showToast('Name, URL, and category are required');
-        return;
+  
+      // Add Plugin Modal 표시
+      function showAddPluginModal(plugin) {
+        selectedPlugin = plugin; // 선택된 플러그인을 저장
+        const modal = document.getElementById('add-plugin-modal');
+        document.getElementById('modal-plugin-name').value = plugin.pluginName;
+        document.getElementById('modal-plugin-url').value = plugin.pluginUrl;
+        document.getElementById('modal-plugin-description').value = plugin.pluginDescription || '';
+        document.getElementById('modal-plugin-category').value = '';
+        modal.style.display = 'block';
       }
-
-      const pluginInfo = {
-        type: 'confirm-add-plugin',
-        plugin: {
-          id: '', // 필요한 경우 플러그인 ID 추가
-          pluginName: name,
-          pluginDescription: description,
-          pluginUrl: url,
-          pluginIcon: pluginIcon,
-          categories: []
-        },
-        category: category
+  
+      // Modal 닫기 핸들러
+      modalCloseButton.onclick = function () {
+        document.getElementById('add-plugin-modal').style.display = 'none';
+      }
+  
+      window.onclick = function (event) {
+        const modal = document.getElementById('add-plugin-modal');
+        if (event.target == modal) {
+          modal.style.display = 'none';
+        }
+      }
+  
+      // Modal Add Plugin 버튼 클릭 핸들러
+      modalAddPluginButton.onclick = function () {
+        const name = document.getElementById('modal-plugin-name').value.trim();
+        const category = document.getElementById('modal-plugin-category').value.trim();
+        const description = document.getElementById('modal-plugin-description').value.trim();
+        const url = document.getElementById('modal-plugin-url').value.trim();
+        const pluginIcon = selectedPlugin.pluginIcon || ''; // 선택된 플러그인의 아이콘 사용
+  
+        if (!name || !category || !url) {
+          showToast('Name, URL, and category are required');
+          return;
+        }
+  
+        const pluginInfo = {
+          type: 'confirm-add-plugin',
+          plugin: {
+            id: selectedPlugin.id, // 선택된 플러그인의 ID 사용
+            pluginName: name,
+            pluginDescription: description,
+            pluginUrl: url,
+            pluginIcon: pluginIcon,
+            categories: []
+          },
+          category: category
+        };
+  
+        parent.postMessage({ pluginMessage: pluginInfo }, '*');
+        document.getElementById('add-plugin-modal').style.display = 'none';
       };
-
-      parent.postMessage({ pluginMessage: pluginInfo }, '*');
-      document.getElementById('add-plugin-modal').style.display = 'none';
-    };
-
-    // Modal용 Category Dropdown 업데이트
-    function updateModalCategoryDropdown() {
-      const dropdown = document.getElementById('modal-category-dropdown');
-      dropdown.innerHTML = '';
-      existingCategories.forEach(category => {
-        const item = document.createElement('div');
-        item.className = 'autocomplete-item';
-        item.textContent = category;
-        item.onclick = () => selectModalCategory(category);
-        dropdown.appendChild(item);
-      });
-    }
-
-    // Modal Category 선택
-    function selectModalCategory(category) {
-      document.getElementById('modal-plugin-category').value = category;
-      document.getElementById('modal-category-dropdown').style.display = 'none';
-    }
-
-    // Modal Plugin Category 입력 이벤트
-    document.getElementById('modal-plugin-category').addEventListener('input', function () {
-      const inputValue = this.value.trim().toLowerCase();
-      const dropdown = document.getElementById('modal-category-dropdown');
-      dropdown.innerHTML = '';
-
-      const filteredCategories = existingCategories.filter(category =>
-        category.toLowerCase().includes(inputValue)
-      );
-
-      if (inputValue && !existingCategories.some(cat => cat.toLowerCase() === inputValue)) {
-        const newItem = document.createElement('div');
-        newItem.className = 'autocomplete-item';
-        newItem.textContent = `Add "${this.value.trim()}"`;
-        newItem.onclick = () => selectModalCategory(this.value.trim());
-        dropdown.appendChild(newItem);
+  
+      // Modal용 Category Dropdown 업데이트
+      function updateModalCategoryDropdown() {
+        const dropdown = document.getElementById('modal-category-dropdown');
+        dropdown.innerHTML = '';
+        existingCategories.forEach(category => {
+          const item = document.createElement('div');
+          item.className = 'autocomplete-item';
+          item.textContent = category;
+          item.onclick = () => selectModalCategory(category);
+          dropdown.appendChild(item);
+        });
       }
-
-      filteredCategories.forEach(category => {
-        const item = document.createElement('div');
-        item.className = 'autocomplete-item';
-        item.textContent = category;
-        item.onclick = () => selectModalCategory(category);
-        dropdown.appendChild(item);
-      });
-
-      dropdown.style.display = (filteredCategories.length || inputValue) ? 'block' : 'none';
-    });
-
-    document.getElementById('modal-plugin-category').addEventListener('focus', function () {
-      updateModalCategoryDropdown();
-      document.getElementById('modal-category-dropdown').style.display = 'block';
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest('#modal-plugin-category')) {
+  
+      // Modal Category 선택
+      function selectModalCategory(category) {
+        document.getElementById('modal-plugin-category').value = category;
         document.getElementById('modal-category-dropdown').style.display = 'none';
       }
-    });
-
-    // Feather Icons 초기화
-    function initFeatherIcons() {
-      feather.replace();
-
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'childList') {
-            feather.replace();
-          }
+  
+      // Modal Plugin Category 입력 이벤트
+      document.getElementById('modal-plugin-category').addEventListener('input', function () {
+        const inputValue = this.value.trim().toLowerCase();
+        const dropdown = document.getElementById('modal-category-dropdown');
+        dropdown.innerHTML = '';
+  
+        const filteredCategories = existingCategories.filter(category =>
+          category.toLowerCase().includes(inputValue)
+        );
+  
+        if (inputValue && !existingCategories.some(cat => cat.toLowerCase() === inputValue)) {
+          const newItem = document.createElement('div');
+          newItem.className = 'autocomplete-item';
+          newItem.textContent = `Add "${this.value.trim()}"`;
+          newItem.onclick = () => selectModalCategory(this.value.trim());
+          dropdown.appendChild(newItem);
+        }
+  
+        filteredCategories.forEach(category => {
+          const item = document.createElement('div');
+          item.className = 'autocomplete-item';
+          item.textContent = category;
+          item.onclick = () => selectModalCategory(category);
+          dropdown.appendChild(item);
         });
+  
+        dropdown.style.display = (filteredCategories.length || inputValue) ? 'block' : 'none';
       });
-
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
+  
+      document.getElementById('modal-plugin-category').addEventListener('focus', function () {
+        updateModalCategoryDropdown();
+        document.getElementById('modal-category-dropdown').style.display = 'block';
       });
-    }
-
-    document.addEventListener('DOMContentLoaded', initFeatherIcons);
-
-    // 초기화 시 플러그인 로드
-    loadPlugins();
-  })();
-</script>
+  
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('#modal-plugin-category')) {
+          document.getElementById('modal-category-dropdown').style.display = 'none';
+        }
+      });
+  
+      // Feather Icons 초기화
+      function initFeatherIcons() {
+        feather.replace();
+  
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'childList') {
+              feather.replace();
+            }
+          });
+        });
+  
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      }
+  
+      document.addEventListener('DOMContentLoaded', initFeatherIcons);
+  
+      // 초기화 시 플러그인 로드
+      loadPlugins();
+    })();
+  </script>
 </body>
 
 </html>

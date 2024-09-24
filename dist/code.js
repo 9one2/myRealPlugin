@@ -4209,7 +4209,7 @@
     },
     {
       id: "843461159747178978",
-      pluginName: "Figma Tokens",
+      pluginName: "F\u3137",
       pluginDescription: "Manage and use design tokens in Figma",
       pluginUrl: "https://www.figma.com/community/plugin/843461159747178978/Figma-Tokens",
       pluginIcon: "./assets/figma-tokens.png",

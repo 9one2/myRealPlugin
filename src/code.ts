@@ -631,7 +631,7 @@ figma.ui.onmessage = async (msg: { type: string; url?: string; name?: string; ca
       if (!plugin || !msg.category) {
         throw new Error('Plugin data and category are required');
       }
-
+  
       const existingPluginIndex = myPluginList.findIndex(function(p) { return p.id === plugin.id; });
       
       if (existingPluginIndex !== -1) {
@@ -654,9 +654,9 @@ figma.ui.onmessage = async (msg: { type: string; url?: string; name?: string; ca
         };
         myPluginList.push(newPlugin);
       }
-
+  
       await saveMyPluginList(myPluginList);
-
+  
       figma.notify('Plugin added successfully', { timeout: 2000 });
       figma.ui.postMessage({ type: 'plugin-added', plugin: plugin });
     } catch (error) {
