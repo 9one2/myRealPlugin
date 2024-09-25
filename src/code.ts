@@ -13,7 +13,7 @@ import removebgIcon from './assets/removeBG.png'
 import loremIcon from './assets/loremInpsum.png'
 import mockupIcon from './assets/mockup.png'
 import artboardIcon from './assets/artboard.png'
-import clayIcon from './assets/clayMockup.svg'
+import clayIcon from './assets/clayMockup.png'
 
 interface PluginSize {
   width: number;
