@@ -6,7 +6,14 @@ import IconifyIcon from './assets/iconify.png'
 import MaterialIcon from './assets/material.png'
 import FeatherIcon from './assets/feather.png'
 import PixabayIcon from './assets/pixbay.png'
+import PexelIcon from './assets/pexel.png'
 import UnsplashIcon from './assets/unsplash.jpeg'
+import AutoflowIcon from './assets/autoflow.png'
+import removebgIcon from './assets/removeBG.png'
+import loremIcon from './assets/loremInpsum.png'
+import mockupIcon from './assets/mockup.png'
+import artboardIcon from './assets/artboard.png'
+import clayIcon from './assets/clayMockup.svg'
 
 interface PluginSize {
   width: number;
@@ -22,6 +29,7 @@ interface PluginInfo {
   categories: string[];
   isDefault?: boolean;
   hidden?: boolean; 
+  
 }
 
 interface StoredData {
@@ -56,7 +64,7 @@ interface IndexedPlugin {
 }
 
 // 하드코딩된 기본 플러그인 데이터
-const defaultCategories = ["Icon", "Image", "Collaboration", "Developer Tools", "Content"];
+const defaultCategories = ["Icon", "Image", "Utility", "Mockup"];
 
 const defaultPlugins: PluginInfo[] = [
   // 기본 플러그인 목록에서 중복된 항목 제거 및 아이콘 참조 수정
@@ -92,6 +100,7 @@ const defaultPlugins: PluginInfo[] = [
     pluginIcon: UnsplashIcon,
     categories: ["Image"]
   },
+  
   {
     id: "1204029601871812061",
     pluginName: "Pixabay",
@@ -99,7 +108,65 @@ const defaultPlugins: PluginInfo[] = [
     pluginUrl: "https://www.figma.com/community/plugin/1204029601871812061/pixabay",
     pluginIcon: PixabayIcon,
     categories: ["Image"]
-  }
+  },
+
+  {
+    id: "829802086526281657",
+    pluginName: "Pexel",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/829802086526281657/pexels",
+    pluginIcon: PexelIcon,
+    categories: ["Image"]
+  },
+  
+  {
+    id: "733902567457592893",
+    pluginName: "Autoflow",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/733902567457592893/autoflow",
+    pluginIcon: AutoflowIcon,
+    categories: ["Utility"]
+  },
+  {
+    id: "738992712906748191",
+    pluginName: "Remove BG",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/738992712906748191/remove-bg",
+    pluginIcon: removebgIcon,
+    categories: ["Utility"]
+  },
+  {
+    id: "736000994034548392",
+    pluginName: "Lorem ipsum",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/736000994034548392/lorem-ipsum",
+    pluginIcon: loremIcon,
+    categories: ["Utility"]
+  },
+  {
+    id: "817043359134136295",
+    pluginName: "Mockup Plugin",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/817043359134136295/mockup-plugin-devices-mockups-print-mockups-ai-mockups",
+    pluginIcon: mockupIcon,
+    categories: ["Mockup"]
+  },
+  {
+    id: "750673765607708804",
+    pluginName: "Artboard Mockup",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/750673765607708804/artboard-mockups",
+    pluginIcon: artboardIcon,
+    categories: ["Mockup"]
+  },
+  {
+    id: "819335598581469537",
+    pluginName: "Clay Mockup",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/819335598581469537/clay-mockups-3d",
+    pluginIcon: clayIcon,
+    categories: ["Mockup"]
+  },
 ];
 console.log('Default plugins:', defaultPlugins);
 
