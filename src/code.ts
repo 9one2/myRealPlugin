@@ -3,6 +3,10 @@
 import pako from 'pako';
 
 import IconifyIcon from './assets/iconify.png'
+import MaterialIcon from './assets/material.png'
+import FeatherIcon from './assets/feather.png'
+import PixabayIcon from './assets/pixbay.png'
+import UnsplashIcon from './assets/unsplash.jpeg'
 
 interface PluginSize {
   width: number;
@@ -52,7 +56,7 @@ interface IndexedPlugin {
 }
 
 // 하드코딩된 기본 플러그인 데이터
-const defaultCategories = ["Icon", "Productivity", "Collaboration", "Developer Tools", "Content"];
+const defaultCategories = ["Icon", "Image", "Collaboration", "Developer Tools", "Content"];
 
 const defaultPlugins: PluginInfo[] = [
   // 기본 플러그인 목록에서 중복된 항목 제거 및 아이콘 참조 수정
@@ -67,10 +71,34 @@ const defaultPlugins: PluginInfo[] = [
   {
     id: "843461159747178978",
     pluginName: "Feather Icon",
-    pluginDescription: "Manage and use design tokens in Figma",
+    pluginDescription: "MRP Recommand Plugins",
     pluginUrl: "https://www.figma.com/community/plugin/843461159747178978/Figma-Tokens",
-    pluginIcon: "./assets/figma-tokens.png",
-    categories: ["Productivity"]
+    pluginIcon: FeatherIcon,
+    categories: ["Icon"]
+  },
+  {
+    id: "740272380439725040",
+    pluginName: "Material Design Icon",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/740272380439725040/material-design-icons",
+    pluginIcon: MaterialIcon,
+    categories: ["Icon"]
+  },
+  {
+    id: "738454987945972471",
+    pluginName: "Unsplash",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/738454987945972471/unsplash",
+    pluginIcon: UnsplashIcon,
+    categories: ["Image"]
+  },
+  {
+    id: "1204029601871812061",
+    pluginName: "Pixabay",
+    pluginDescription: "MRP Recommand Plugins",
+    pluginUrl: "https://www.figma.com/community/plugin/1204029601871812061/pixabay",
+    pluginIcon: PixabayIcon,
+    categories: ["Image"]
   }
 ];
 console.log('Default plugins:', defaultPlugins);

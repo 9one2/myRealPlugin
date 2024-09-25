@@ -18,7 +18,7 @@
 
     .content-wrapper {
       padding: 20px;
-      height: calc(100% - 40px);
+      height: fit-content;
       overflow-y: auto;
       scrollbar-width: none;
     }
@@ -72,7 +72,7 @@
       flex-direction: column;
       flex-grow: 1;
       min-width: 200px;
-      gap: 4px;
+      gap: 16px;
     }
 
     .plugin-actions {
@@ -177,7 +177,6 @@
     #category-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
       margin-bottom: 10px;
     }
 
@@ -241,7 +240,7 @@
 
     #search-input {
       flex-grow: 1;
-      padding: 10px;
+      padding: 16px;
       border: 1.5px solid #ddd;
       border-radius: 8px;
     }
@@ -389,7 +388,7 @@
       let defaultPlugins = [];
       let searchTimeout;
       let selectedPlugin = null;
-      let currentDisplayedPlugins = []; // 현재 표시되는 플러그인 목록을 저장하는 변수 추가
+      let currentDisplayedPlugins = [];
   
       // 변수 선언
       const searchInput = document.getElementById('search-input');
@@ -411,7 +410,7 @@
           console.log('Requesting plugins list');
           parent.postMessage({ pluginMessage: { type: 'get-plugins' } }, '*');
         } else if (tabName === 'home') {
-          currentDisplayedPlugins = defaultPlugins; // 현재 표시되는 플러그인 목록을 기본 플러그인으로 설정
+          currentDisplayedPlugins = defaultPlugins;
           renderDefaultPluginList(defaultPlugins);
           updateCategoryChips(defaultPlugins, 'home');
         }
@@ -454,33 +453,33 @@
             chipsContainer.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
             e.target.classList.add('active');
             if (context === 'home') {
-              filterPlugins(currentDisplayedPlugins, e.target.dataset.category, 'default-plugin-list'); // currentDisplayedPlugins 사용
+              filterPlugins(currentDisplayedPlugins, e.target.dataset.category, 'default-plugin-list', 'home');
             } else {
-              filterPlugins(myPlugins, e.target.dataset.category, 'pluginList');
+              filterPlugins(myPlugins, e.target.dataset.category, 'pluginList', 'my-plugins');
             }
           });
         });
       }
   
       // 플러그인 필터링
-      function filterPlugins(plugins, category, containerId) {
+      function filterPlugins(plugins, category, containerId, context) {
         console.log('Filtering plugins by category:', category);
         const container = document.getElementById(containerId);
         container.innerHTML = '';
         const filteredPlugins = category === 'all' ? plugins : plugins.filter(plugin => plugin.categories && plugin.categories.includes(category));
-        renderPluginItems(filteredPlugins, containerId);
+        renderPluginItems(filteredPlugins, containerId, context);
       }
   
       // 기본 플러그인 목록 렌더링
       function renderDefaultPluginList(plugins) {
-        currentDisplayedPlugins = plugins; // 현재 표시되는 플러그인 목록 업데이트
+        currentDisplayedPlugins = plugins;
         const container = document.getElementById('default-plugin-list');
         container.innerHTML = '';
-        renderPluginItems(plugins, 'default-plugin-list');
+        renderPluginItems(plugins, 'default-plugin-list', 'home');
       }
   
       // 플러그인 아이템 렌더링 공통 함수
-      function renderPluginItems(plugins, containerId) {
+      function renderPluginItems(plugins, containerId, context) {
         const container = document.getElementById(containerId);
         container.innerHTML = ''; // 컨테이너 초기화
         plugins.forEach(plugin => {
@@ -488,24 +487,36 @@
           item.className = 'plugin-item';
           item.dataset.id = plugin.id;
           item.dataset.url = plugin.pluginUrl;
+          item.dataset.category = plugin.categories ? plugin.categories[0] : ''; // 첫 번째 카테고리 사용
           item.innerHTML = `
             <img src="${plugin.pluginIcon}" alt="${plugin.pluginName}">
             <div class="plugin-info">
               <div style="display:flex; flex-direction:column; gap: 4px;">
                 <h4 style="margin:0;font-size: 18px; color: #3a3d51; font-weight: 300;">${plugin.pluginName}</h4>
-                ${plugin.pluginDescription ? `<p style="margin:0; font-size:13px; color: #96a1aa;">${plugin.pluginDescription}</p>` : ''}
+                ${plugin.pluginDescription ? `<p style="margin:0; font-size:13px; color: #96a1aa; white-space: nowrap; width: 340px; overflow: hidden; text-overflow: ellipsis;">${plugin.pluginDescription}</p>` : ''}
               </div>
               ${plugin.categories && plugin.categories.length > 0 ? `<small style="color: coral; background-color: #ff7f5021; width: fit-content; padding: 2px 4px; border-radius: 2px;">${plugin.categories.join(', ')}</small>` : ''}
             </div>
             <div class="plugin-actions">
-              <button class="add-to-my-plugins" title="Add to My Plugins">
-                <i data-feather="plus-circle" stroke="#96a1aa" stroke-width="1.5"></i>
-              </button>
+              ${
+                context === 'my-plugins' ? `
+                <button class="delete-button" title="Delete plugin">
+                  <i data-feather="trash-2" stroke="#96a1aa" stroke-width="1.5"></i>
+                </button>
+                ` : `
+                <button class="add-to-my-plugins" title="Add to My Plugins">
+                  <i data-feather="plus-circle" stroke="#96a1aa" stroke-width="1.5"></i>
+                </button>
+                `
+              }
             </div>
           `;
           // 플러그인 아이템 클릭 시 URL 이동
           item.onclick = (e) => {
-            if (!e.target.closest('.add-to-my-plugins')) {
+            if (context === 'my-plugins' && e.target.closest('.delete-button')) {
+              return; // 삭제 버튼 클릭 시에는 URL 이동하지 않음
+            }
+            if (!e.target.closest('.add-to-my-plugins') && !e.target.closest('.delete-button')) {
               const pluginUrl = item.dataset.url;
               if (pluginUrl) {
                 openPluginPage(plugin.id, pluginUrl);
@@ -514,19 +525,32 @@
               }
             }
           };
-          // 'Add to My Plugins' 버튼 클릭 핸들러
-          item.querySelector('.add-to-my-plugins').addEventListener('click', (e) => {
-            e.stopPropagation();
-            // 선택된 플러그인을 저장
-            selectedPlugin = plugin;
-            // 플러그인 데이터를 메시지로 전달
-            parent.postMessage({
-              pluginMessage: {
-                type: 'add-plugin-from-search',
-                plugin: plugin
+          if (context === 'my-plugins') {
+            // Delete 버튼 클릭 핸들러
+            item.querySelector('.delete-button').addEventListener('click', (e) => {
+              e.stopPropagation();
+              const pluginId = item.dataset.id;
+              const category = item.dataset.category;
+              if (confirm('Are you sure you want to delete this plugin from the category?')) {
+                console.log('Deleting plugin:', pluginId, 'from category:', category);
+                parent.postMessage({ pluginMessage: { type: 'delete-plugin', pluginId, category } }, '*');
               }
-            }, '*');
-          });
+            });
+          } else {
+            // 'Add to My Plugins' 버튼 클릭 핸들러
+            item.querySelector('.add-to-my-plugins').addEventListener('click', (e) => {
+              e.stopPropagation();
+              // 선택된 플러그인을 저장
+              selectedPlugin = plugin;
+              // 플러그인 데이터를 메시지로 전달
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'add-plugin-from-search',
+                  plugin: plugin
+                }
+              }, '*');
+            });
+          }
           container.appendChild(item);
         });
         feather.replace();
@@ -548,19 +572,10 @@
         const pluginList = document.getElementById('pluginList');
         pluginList.innerHTML = '';
         myPlugins = plugins;
-        renderPluginItems(plugins, 'pluginList');
+        renderPluginItems(plugins, 'pluginList', 'my-plugins');
         updateExistingCategories(plugins);
         updateCategoryChips(plugins, 'my-plugins');
       }
-  
-      // Delete Plugin
-      window.deletePlugin = function (event, pluginId, category) {
-        event.stopPropagation();
-        if (confirm('Are you sure you want to delete this plugin from the category?')) {
-          console.log('Deleting plugin:', pluginId, 'from category:', category);
-          parent.postMessage({ pluginMessage: { type: 'delete-plugin', pluginId, category } }, '*');
-        }
-      };
   
       // Existing Categories 업데이트
       function updateExistingCategories(plugins) {
@@ -575,7 +590,7 @@
           parent.postMessage({ pluginMessage: { type: 'search-plugins', query } }, '*');
         } else {
           hideLoadingSpinner();
-          currentDisplayedPlugins = defaultPlugins; // 현재 표시되는 플러그인 목록을 기본 플러그인으로 설정
+          currentDisplayedPlugins = defaultPlugins;
           renderDefaultPluginList(defaultPlugins);
           updateCategoryChips(defaultPlugins, 'home');
         }
@@ -590,7 +605,7 @@
       searchResetButton.addEventListener('click', () => {
         searchInput.value = '';
         searchResetButton.style.display = 'none';
-        currentDisplayedPlugins = defaultPlugins; // 현재 표시되는 플러그인 목록을 기본 플러그인으로 설정
+        currentDisplayedPlugins = defaultPlugins;
         renderDefaultPluginList(defaultPlugins);
         updateCategoryChips(defaultPlugins, 'home');
       });
@@ -607,10 +622,8 @@
       function renderSearchResults(results) {
         console.log('Displaying search results:', results);
         hideLoadingSpinner();
-        currentDisplayedPlugins = results; // 현재 표시되는 플러그인 목록을 검색 결과로 설정
-        const container = document.getElementById('default-plugin-list');
-        container.innerHTML = '';
-        renderPluginItems(results, 'default-plugin-list');
+        currentDisplayedPlugins = results;
+        renderDefaultPluginList(results);
         updateCategoryChips(results, 'home');
       }
   
@@ -764,7 +777,7 @@
             showAddPluginModalWithPlugin(message.plugin);
           } else if (message.type === 'default-plugins') {
             defaultPlugins = message.plugins;
-            currentDisplayedPlugins = defaultPlugins; // 현재 표시되는 플러그인 목록을 기본 플러그인으로 설정
+            currentDisplayedPlugins = defaultPlugins;
             renderDefaultPluginList(defaultPlugins);
             updateCategoryChips(defaultPlugins, 'home');
           }
@@ -798,6 +811,7 @@
       initialize();
     })();
   </script>
+   
   
   
 </body>
