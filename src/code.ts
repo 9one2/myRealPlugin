@@ -66,7 +66,7 @@ const defaultPlugins: PluginInfo[] = [
   },
   {
     id: "843461159747178978",
-    pluginName: "Fㄷ",
+    pluginName: "Feather Icon",
     pluginDescription: "Manage and use design tokens in Figma",
     pluginUrl: "https://www.figma.com/community/plugin/843461159747178978/Figma-Tokens",
     pluginIcon: "./assets/figma-tokens.png",
@@ -663,5 +663,9 @@ figma.ui.onmessage = async (msg: { type: string; url?: string; name?: string; ca
       console.error('Error confirming plugin addition:', error);
       figma.notify('Error adding plugin: ' + (error instanceof Error ? error.message : 'An unknown error occurred'), { error: true });
     }
+  }
+  else if (msg.type === 'get-default-plugins') {
+    console.log('Received get-default-plugins request');
+    figma.ui.postMessage({ type: 'default-plugins', plugins: defaultPlugins });
   }
 };
