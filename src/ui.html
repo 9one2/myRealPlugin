@@ -488,6 +488,10 @@
           item.dataset.id = plugin.id;
           item.dataset.url = plugin.pluginUrl;
           item.dataset.category = plugin.categories ? plugin.categories[0] : ''; // 첫 번째 카테고리 사용
+  
+          // My Plugin List에 해당 플러그인이 있는지 확인
+          const isAdded = myPlugins.some(myPlugin => myPlugin.id === plugin.id);
+  
           item.innerHTML = `
             <img src="${plugin.pluginIcon}" alt="${plugin.pluginName}">
             <div class="plugin-info">
@@ -504,13 +508,46 @@
                   <i data-feather="trash-2" stroke="#96a1aa" stroke-width="1.5"></i>
                 </button>
                 ` : `
-                <button class="add-to-my-plugins" title="Add to My Plugins">
-                  <i data-feather="plus-circle" stroke="#96a1aa" stroke-width="1.5"></i>
+                <button class="add-to-my-plugins ${isAdded ? 'added' : ''}" title="${isAdded ? 'Added' : 'Add to My Plugins'}">
+                  ${isAdded ? 'Added' : 'Add'}
                 </button>
                 `
               }
             </div>
           `;
+  
+          // 스타일링 및 이벤트 처리
+          if (context !== 'my-plugins') {
+            const addButton = item.querySelector('.add-to-my-plugins');
+            if (isAdded) {
+              addButton.classList.add('added-button');
+              addButton.disabled = true;
+            } else {
+              addButton.classList.remove('added-button');
+              addButton.disabled = false;
+            }
+  
+            // 'Add to My Plugins' 버튼 클릭 핸들러
+            addButton.addEventListener('click', (e) => {
+              e.stopPropagation();
+              // 선택된 플러그인을 저장
+              selectedPlugin = plugin;
+              // 모달 표시
+              showAddPluginModalWithPlugin(plugin);
+            });
+          } else {
+            // Delete 버튼 클릭 핸들러
+            item.querySelector('.delete-button').addEventListener('click', (e) => {
+              e.stopPropagation();
+              const pluginId = item.dataset.id;
+              const category = item.dataset.category;
+              if (confirm('Are you sure you want to delete this plugin from the category?')) {
+                console.log('Deleting plugin:', pluginId, 'from category:', category);
+                parent.postMessage({ pluginMessage: { type: 'delete-plugin', pluginId, category } }, '*');
+              }
+            });
+          }
+  
           // 플러그인 아이템 클릭 시 URL 이동
           item.onclick = (e) => {
             if (context === 'my-plugins' && e.target.closest('.delete-button')) {
@@ -525,32 +562,7 @@
               }
             }
           };
-          if (context === 'my-plugins') {
-            // Delete 버튼 클릭 핸들러
-            item.querySelector('.delete-button').addEventListener('click', (e) => {
-              e.stopPropagation();
-              const pluginId = item.dataset.id;
-              const category = item.dataset.category;
-              if (confirm('Are you sure you want to delete this plugin from the category?')) {
-                console.log('Deleting plugin:', pluginId, 'from category:', category);
-                parent.postMessage({ pluginMessage: { type: 'delete-plugin', pluginId, category } }, '*');
-              }
-            });
-          } else {
-            // 'Add to My Plugins' 버튼 클릭 핸들러
-            item.querySelector('.add-to-my-plugins').addEventListener('click', (e) => {
-              e.stopPropagation();
-              // 선택된 플러그인을 저장
-              selectedPlugin = plugin;
-              // 플러그인 데이터를 메시지로 전달
-              parent.postMessage({
-                pluginMessage: {
-                  type: 'add-plugin-from-search',
-                  plugin: plugin
-                }
-              }, '*');
-            });
-          }
+  
           container.appendChild(item);
         });
         feather.replace();
@@ -571,10 +583,15 @@
         console.log('Rendering plugin list:', plugins);
         const pluginList = document.getElementById('pluginList');
         pluginList.innerHTML = '';
-        myPlugins = plugins;
+        myPlugins = plugins; // myPlugins 업데이트
         renderPluginItems(plugins, 'pluginList', 'my-plugins');
         updateExistingCategories(plugins);
         updateCategoryChips(plugins, 'my-plugins');
+  
+        // Home 탭의 버튼 상태 업데이트
+        if (currentDisplayedPlugins && currentDisplayedPlugins.length > 0) {
+          renderDefaultPluginList(currentDisplayedPlugins);
+        }
       }
   
       // Existing Categories 업데이트
@@ -772,6 +789,7 @@
             renderSearchResults(message.results);
           } else if (message.type === 'plugin-added') {
             showToast('Plugin added successfully');
+            parent.postMessage({ pluginMessage: { type: 'get-plugins' } }, '*'); // My Plugin List 업데이트 요청
             switchTab('plugin-list');
           } else if (message.type === 'show-category-modal') {
             showAddPluginModalWithPlugin(message.plugin);
@@ -793,6 +811,25 @@
         document.getElementById('modal-plugin-description').value = plugin.pluginDescription || '';
         document.getElementById('modal-plugin-category').value = '';
         modal.style.display = 'block';
+  
+        // 모달의 'Add Plugin' 버튼 클릭 시 핸들러 수정
+        modalAddPluginButton.onclick = function () {
+          const category = document.getElementById('modal-plugin-category').value.trim();
+  
+          if (!category) {
+            showToast('Category is required');
+            return;
+          }
+  
+          parent.postMessage({
+            pluginMessage: {
+              type: 'confirm-add-plugin',
+              plugin: selectedPlugin,
+              category: category
+            }
+          }, '*');
+          document.getElementById('add-plugin-modal').style.display = 'none';
+        };
       }
   
       // 초기화 시 기본 플러그인 목록 요청
@@ -811,6 +848,7 @@
       initialize();
     })();
   </script>
+  
    
   
   

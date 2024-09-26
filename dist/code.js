@@ -4231,7 +4231,7 @@
 
   // src/code.ts
   var defaultPlugins = [
-    // 기본 플러그인 목록에서 중복된 항목 제거 및 아이콘 참조 수정
+    // 기본 플러그인 목록
     {
       id: "735098390272716381",
       pluginName: "Iconify",
@@ -4466,9 +4466,10 @@
     }
     let updatedData;
     if (!clientData && !fileData) {
-      console.log("No existing data found, initializing with default plugins");
+      console.log("No existing data found, initializing with empty plugin list");
       updatedData = {
-        plugins: defaultPlugins.map((p) => Object.assign({}, p, { hidden: false })),
+        plugins: [],
+        // 빈 배열로 초기화
         lastUpdated: Date.now()
       };
     } else if (!clientData) {
@@ -4478,7 +4479,6 @@
     } else {
       updatedData = clientData.lastUpdated > fileData.lastUpdated ? clientData : fileData;
     }
-    updatedData.plugins = mergeWithDefaultPlugins(updatedData.plugins);
     console.log("Using data:", updatedData);
     const compressedData = compressData(updatedData);
     if (compressedData.length > 0) {
@@ -4492,17 +4492,6 @@
       return !plugin.hidden;
     });
     return myPluginList;
-  }
-  function mergeWithDefaultPlugins(userPlugins) {
-    const mergedPlugins = userPlugins.slice();
-    defaultPlugins.forEach(function(defaultPlugin) {
-      if (!mergedPlugins.some(function(plugin) {
-        return plugin.id === defaultPlugin.id;
-      })) {
-        mergedPlugins.push(Object.assign({}, defaultPlugin, { isDefault: true, hidden: false }));
-      }
-    });
-    return mergedPlugins;
   }
   async function saveMyPluginList(plugins) {
     console.log("Saving My Plugin List:", plugins);
@@ -4711,14 +4700,13 @@
         console.log("Before deletion:", myPluginList);
         myPluginList = myPluginList.map((plugin) => {
           if (plugin.id === msg.pluginId) {
-            if (plugin.isDefault) {
-              plugin.hidden = true;
-            } else {
-              plugin.categories = plugin.categories.filter((cat) => cat !== msg.category);
+            plugin.categories = plugin.categories.filter((cat) => cat !== msg.category);
+            if (plugin.categories.length === 0) {
+              return null;
             }
           }
           return plugin;
-        }).filter((plugin) => !plugin.isDefault || plugin.isDefault && !plugin.hidden);
+        }).filter((plugin) => plugin !== null);
         console.log("After deletion:", myPluginList);
         await saveMyPluginList(myPluginList);
         figma.notify("Plugin deleted successfully", { timeout: 2e3 });

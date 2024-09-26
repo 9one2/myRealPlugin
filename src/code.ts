@@ -29,7 +29,6 @@ interface PluginInfo {
   categories: string[];
   isDefault?: boolean;
   hidden?: boolean; 
-  
 }
 
 interface StoredData {
@@ -67,7 +66,7 @@ interface IndexedPlugin {
 const defaultCategories = ["Icon", "Image", "Utility", "Mockup"];
 
 const defaultPlugins: PluginInfo[] = [
-  // 기본 플러그인 목록에서 중복된 항목 제거 및 아이콘 참조 수정
+  // 기본 플러그인 목록
   {
     id: "735098390272716381",
     pluginName: "Iconify",
@@ -100,7 +99,6 @@ const defaultPlugins: PluginInfo[] = [
     pluginIcon: UnsplashIcon,
     categories: ["Image"]
   },
-  
   {
     id: "1204029601871812061",
     pluginName: "Pixabay",
@@ -109,7 +107,6 @@ const defaultPlugins: PluginInfo[] = [
     pluginIcon: PixabayIcon,
     categories: ["Image"]
   },
-
   {
     id: "829802086526281657",
     pluginName: "Pexel",
@@ -118,7 +115,6 @@ const defaultPlugins: PluginInfo[] = [
     pluginIcon: PexelIcon,
     categories: ["Image"]
   },
-  
   {
     id: "733902567457592893",
     pluginName: "Autoflow",
@@ -171,7 +167,7 @@ const defaultPlugins: PluginInfo[] = [
 console.log('Default plugins:', defaultPlugins);
 
 // Airtable API 관련 상수
-const accessToken = "patGgL1ObwK1rvVRH.bde07c08dc54fd2fd72bca8aced68fd2882e81924e5565a4641dea170b4933af"; // 보안을 위해 실제 토큰은 코드에 포함하지 마세요.
+const accessToken = "patGgL1ObwK1rvVRH.bde07c08dc54fd2fd72bca8aced68fd2882e81924e5565a4641dea170b4933af"; // 실제 토큰은 코드에 포함하지 마세요.
 const baseId = "appoQJ18zMmkhzu10";
 const dataTable = "tblex31xbt0ajXx1F";
 const url = `https://api.airtable.com/v0/${baseId}/${dataTable}`;
@@ -340,9 +336,9 @@ async function syncMyPluginList(): Promise<PluginInfo[]> {
   let updatedData: StoredData;
   
   if (!clientData && !fileData) {
-    console.log('No existing data found, initializing with default plugins');
+    console.log('No existing data found, initializing with empty plugin list');
     updatedData = { 
-      plugins: defaultPlugins.map((p) => Object.assign({}, p, { hidden: false })), 
+      plugins: [], // 빈 배열로 초기화
       lastUpdated: Date.now() 
     };
   } else if (!clientData) {
@@ -352,9 +348,6 @@ async function syncMyPluginList(): Promise<PluginInfo[]> {
   } else {
     updatedData = clientData.lastUpdated > fileData.lastUpdated ? clientData : fileData;
   }
-
-  // 기본 플러그인과 사용자 플러그인 병합
-  updatedData.plugins = mergeWithDefaultPlugins(updatedData.plugins);
 
   console.log('Using data:', updatedData);
 
@@ -371,17 +364,6 @@ async function syncMyPluginList(): Promise<PluginInfo[]> {
 
   myPluginList = updatedData.plugins.filter(function(plugin) { return !plugin.hidden; });  // hidden이 true인 플러그인 제외
   return myPluginList;
-}
-
-// 기본 플러그인과 사용자 플러그인 병합
-function mergeWithDefaultPlugins(userPlugins: PluginInfo[]): PluginInfo[] {
-  const mergedPlugins = userPlugins.slice(); // 배열 복사
-  defaultPlugins.forEach(function(defaultPlugin) {
-    if (!mergedPlugins.some(function(plugin) { return plugin.id === defaultPlugin.id; })) {
-      mergedPlugins.push(Object.assign({}, defaultPlugin, { isDefault: true, hidden: false }));
-    }
-  });
-  return mergedPlugins;
 }
 
 // 데이터 저장
@@ -513,6 +495,7 @@ function extractPluginInfo(url: string, category: string, description?: string, 
 
   return pluginInfo;
 }
+
 // 플러그인 초기화 함수
 async function initializePlugin() {
   console.log('Initializing plugin...');
@@ -638,8 +621,6 @@ figma.ui.onmessage = async (msg: { type: string; url?: string; name?: string; ca
       figma.notify('Error: No URL provided', { error: true });
     }
   }
-  
-  
   else if (msg.type === 'delete-plugin') {
     try {
       if (!msg.pluginId || !msg.category) {
@@ -650,15 +631,14 @@ figma.ui.onmessage = async (msg: { type: string; url?: string; name?: string; ca
 
       myPluginList = myPluginList.map(plugin => {
         if (plugin.id === msg.pluginId) {
-          if (plugin.isDefault) {
-            // 기본 플러그인은 삭제하지 않고 숨김 처리
-            plugin.hidden = true;
-          } else {
-            plugin.categories = plugin.categories.filter(cat => cat !== msg.category);
+          plugin.categories = plugin.categories.filter(cat => cat !== msg.category);
+          // 카테고리가 모두 삭제되면 플러그인을 제거
+          if (plugin.categories.length === 0) {
+            return null;
           }
         }
         return plugin;
-      }).filter(plugin => !plugin.isDefault || (plugin.isDefault && !plugin.hidden));
+      }).filter(plugin => plugin !== null) as PluginInfo[];
 
       console.log('After deletion:', myPluginList);
 
@@ -764,3 +744,4 @@ figma.ui.onmessage = async (msg: { type: string; url?: string; name?: string; ca
     figma.ui.postMessage({ type: 'default-plugins', plugins: defaultPlugins });
   }
 };
+
