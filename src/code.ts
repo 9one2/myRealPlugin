@@ -216,7 +216,7 @@ async function initializeSize() {
   if (savedSize) {
     figma.ui.resize(savedSize.width, savedSize.height);
   } else {
-    figma.ui.resize(500, 600);
+    figma.ui.resize(600, 800);
   }
 }
 
