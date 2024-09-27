@@ -43,13 +43,12 @@
 
     .plugin-item {
       border: 2px solid #f0f3f7;
-      padding: 16px 8px 16px 16px;
+      padding: 16px;
       margin-bottom: 12px;
       display: flex;
       align-items: flex-start;
       cursor: pointer;
       border-radius: 12px;
-      flex-wrap: wrap;
     }
 
     .plugin-item:hover {
@@ -79,7 +78,6 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      width: 40px;
     }
 
     .btnAdd,
@@ -89,7 +87,7 @@
       border: none;
       background-color: coral;
       color: #fff;
-      font-weight: 600;
+      font-weight: 400;
       font-size: 14px;
       border-radius: 8px;
       display: flex;
@@ -156,6 +154,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      color: #96a1aa;
+
     }
 
     .delete-button:hover,
@@ -177,7 +177,6 @@
     #category-chips {
       display: flex;
       flex-wrap: wrap;
-      margin-bottom: 10px;
     }
 
     .category-chip {
@@ -251,6 +250,9 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      display: flex;
+      align-self: flex-start;
+      margin-top: 5px;
     }
 
     #loading-spinner {
@@ -504,7 +506,7 @@
             <div class="plugin-actions">
               ${
                 context === 'my-plugins' ? `
-                <button class="delete-button" title="Delete plugin">
+                <button  class="delete-button" title="Delete plugin">
                   <i data-feather="trash-2" stroke="#96a1aa" stroke-width="1.5"></i>
                 </button>
                 ` : `

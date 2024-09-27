@@ -70,7 +70,7 @@ const defaultPlugins: PluginInfo[] = [
   {
     id: "735098390272716381",
     pluginName: "Iconify",
-    pluginDescription: "Iconify brings a huge selection of icons to Figma.",
+    pluginDescription: "MRP Recommand Plugins",
     pluginUrl: "https://www.figma.com/community/plugin/735098390272716381/iconify",
     pluginIcon: IconifyIcon,
     categories: ["Icon"]
@@ -216,7 +216,7 @@ async function initializeSize() {
   if (savedSize) {
     figma.ui.resize(savedSize.width, savedSize.height);
   } else {
-    figma.ui.resize(600, 800);
+    figma.ui.resize(500, 700);
   }
 }
 

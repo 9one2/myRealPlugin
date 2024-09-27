@@ -4365,7 +4365,7 @@
     if (savedSize) {
       figma.ui.resize(savedSize.width, savedSize.height);
     } else {
-      figma.ui.resize(600, 800);
+      figma.ui.resize(500, 700);
     }
   }
   function compressData(data) {
