@@ -27,7 +27,7 @@ interface PluginInfo {
   pluginDescription?: string;
   pluginUrl: string;
   pluginIcon: string;
-  categories: string[]; // 반드시 string[] 타입으로 설정
+  categories: string[];
   isDefault?: boolean;
   hidden?: boolean; 
 }
@@ -54,16 +54,6 @@ interface CompressedData {
   data: Uint8Array;
 }
 
-interface IndexedPlugin {
-  id: string;
-  pluginName: string;
-  pluginDescription: string;
-  pluginUrl: string;
-  pluginIcon: string;
-  categories: string[];
-  searchTerms: string;
-}
-
 // 하드코딩된 기본 플러그인 데이터
 const defaultCategories = ["Icon", "Image", "Utility", "Mockup"];
 
@@ -71,7 +61,7 @@ const defaultPlugins: PluginInfo[] = [
   // 기본 플러그인 목록
   {
     id: "735098390272716381",
-    pluginName: "Iconㅇㅇㅇㅇㅇify",
+    pluginName: "Iconify",
     pluginDescription: "Iconify brings a huge selection of icons to Figma.",
     pluginUrl: "https://www.figma.com/community/plugin/735098390272716381/iconify",
     pluginIcon: IconifyIcon,
@@ -319,6 +309,24 @@ function extractPluginIdFromUrl(url: string): string | null {
   return null;
 }
 
+// 에러 발생 시 재시도 로직
+async function fetchWithRetry(url: string, options: any, retries: number = 3, backoff: number = 300): Promise<any> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.warn(`Fetch attempt ${i + 1} failed: ${error}`);
+      if (i < retries - 1) {
+        await new Promise(res => setTimeout(res, backoff * Math.pow(2, i)));
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
 // My Plugin List 동기화
 async function syncMyPluginList(): Promise<PluginInfo[]> {
   console.log('Syncing My Plugin List...');
@@ -415,33 +423,48 @@ async function saveMyPluginList(plugins: PluginInfo[]) {
   }
 }
 
-// Airtable에서 모든 데이터 가져오기
-async function fetchAllDataFromAirtable(): Promise<void> {
+// Airtable에서 모든 데이터 가져오기 (최적화된 버전)
+async function fetchAllDataFromAirtable(maxRecords: number = 2000): Promise<void> {
   console.log('Fetching all data from Airtable...');
   let allRecords: AirtableRecord[] = [];
   let offset: string | undefined;
+  let recordsFetched = 0;
+
+  // 필요한 필드만 요청하여 데이터 양을 줄임
+  const fields = ['plugin-name', 'plugin-desc', 'plugin-link', 'plugin-icon'];
+  const fieldsParam = fields.map(field => `fields[]=${encodeURIComponent(field)}`).join('&');
 
   try {
     do {
-      const requestUrl = `${url}?pageSize=100${offset ? `&offset=${offset}` : ''}`;
+      // 첫 번째 요청에만 maxRecords를 포함
+      const maxRecordsParam = !offset ? `&maxRecords=${maxRecords}` : '';
+      const requestUrl = `${url}?pageSize=100${offset ? `&offset=${offset}` : ''}&${fieldsParam}${maxRecordsParam}`;
       console.log(`Fetching URL: ${requestUrl}`);
-      const response = await fetch(requestUrl, {
+      
+      const data = await fetchWithRetry(requestUrl, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
       });
 
-      console.log(`HTTP Response Status: ${response.status}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
       console.log(`Fetched ${data.records.length} records from Airtable`);
       allRecords = allRecords.concat(data.records);
+      recordsFetched += data.records.length;
+
+      // 업데이트된 offset 가져오기
       offset = data.offset;
-    } while (offset);
+
+      // 최대 레코드 수에 도달했는지 확인
+      if (recordsFetched >= maxRecords) {
+        console.log('Reached maximum record limit.');
+        break;
+      }
+
+      // UI에 진행 상황 업데이트
+      figma.ui.postMessage({ type: 'fetch-progress', fetched: recordsFetched, total: maxRecords });
+
+    } while (offset && recordsFetched < maxRecords);
 
     airtablePlugins = allRecords.map(record => ({
       id: extractPluginIdFromUrl(record.fields['plugin-link']) || record.id, // plugin-link에서 ID 추출 또는 fallback
@@ -454,9 +477,14 @@ async function fetchAllDataFromAirtable(): Promise<void> {
 
     console.log('Fetched Airtable plugins:', airtablePlugins.length);
     console.log('Airtable Plugins:', airtablePlugins);
+
+    // UI에 fetch 완료 메시지 전송
+    figma.ui.postMessage({ type: 'fetch-complete' });
+
   } catch (error) {
     console.error('Error fetching Airtable data:', error);
     airtablePlugins = []; // 실패 시 빈 배열로 설정
+    figma.ui.postMessage({ type: 'fetch-error', error: error instanceof Error ? error.message : 'Unknown error' });
   }
 }
 
@@ -559,10 +587,15 @@ async function initializePlugin() {
     console.error('Error syncing My Plugin List:', error);
   }
 
-  // Airtable에서 모든 플러그인 데이터 가져오기
+  // Airtable에서 모든 플러그인 데이터 가져오기 (only if not cached)
   try {
-    await fetchAllDataFromAirtable();
-    console.log('Airtable plugins fetched');
+    // Check if Airtable plugins are already loaded
+    if (airtablePlugins.length === 0) {
+      await fetchAllDataFromAirtable();
+      console.log('Airtable plugins fetched');
+    } else {
+      console.log('Airtable plugins already loaded');
+    }
   } catch (error) {
     console.error('Error fetching Airtable plugins:', error);
   }

@@ -353,6 +353,11 @@
         <div class="spinner"></div>
       </div>
       <div id="default-plugin-list"></div>
+      <div style="margin-top: 20px; text-align: center;">
+        <button id="survey-button" type="button" style="width:100%; padding: 12px 20px; background-color: #363636; color: white; border: none; border-radius: 6px; cursor: pointer;     display: flex; justify-content: center; align-items: center; gap: 4px; font-size: 16px;">
+          Send Opinion <i data-feather="arrow-right" stroke="#fff" stroke-width="1.5"></i>
+        </button>
+      </div>
     </div>
     <div id="plugin-list" class="content">
       <div id="category-chips-my-plugins"></div>
@@ -379,8 +384,6 @@
     </div>
   </div>
 
-  <div id="resizer"></div>
-  <div id="toast"></div>
 
   <div id="add-plugin-modal" class="modal">
     <div class="modal-content">
@@ -451,6 +454,11 @@
           toast.className = toast.className.replace('show', '');
         }, 3000);
       }
+
+      // 설문 이동
+      document.getElementById('survey-button').addEventListener('click', function() {
+      window.open('https://airtable.com/appoQJ18zMmkhzu10/pagLy5t6fiYpsOKf1/form', '_blank', 'noopener,noreferrer');
+      });
 
       // 카테고리 칩 업데이트
       function updateCategoryChips(plugins, context) {

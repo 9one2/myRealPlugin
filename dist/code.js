@@ -4234,7 +4234,7 @@
     // 기본 플러그인 목록
     {
       id: "735098390272716381",
-      pluginName: "Icon\u3147\u3147\u3147\u3147\u3147ify",
+      pluginName: "Iconify",
       pluginDescription: "Iconify brings a huge selection of icons to Figma.",
       pluginUrl: "https://www.figma.com/community/plugin/735098390272716381/iconify",
       pluginIcon: iconify_default,
@@ -4450,6 +4450,22 @@
     }
     return null;
   }
+  async function fetchWithRetry(url2, options, retries = 3, backoff = 300) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(url2, options);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+      } catch (error) {
+        console.warn(`Fetch attempt ${i + 1} failed: ${error}`);
+        if (i < retries - 1) {
+          await new Promise((res) => setTimeout(res, backoff * Math.pow(2, i)));
+        } else {
+          throw error;
+        }
+      }
+    }
+  }
   async function syncMyPluginList() {
     console.log("Syncing My Plugin List...");
     let clientData = null;
@@ -4531,29 +4547,34 @@
       console.log("No data to save");
     }
   }
-  async function fetchAllDataFromAirtable() {
+  async function fetchAllDataFromAirtable(maxRecords = 2e3) {
     console.log("Fetching all data from Airtable...");
     let allRecords = [];
     let offset;
+    let recordsFetched = 0;
+    const fields = ["plugin-name", "plugin-desc", "plugin-link", "plugin-icon"];
+    const fieldsParam = fields.map((field) => `fields[]=${encodeURIComponent(field)}`).join("&");
     try {
       do {
-        const requestUrl = `${url}?pageSize=100${offset ? `&offset=${offset}` : ""}`;
+        const maxRecordsParam = !offset ? `&maxRecords=${maxRecords}` : "";
+        const requestUrl = `${url}?pageSize=100${offset ? `&offset=${offset}` : ""}&${fieldsParam}${maxRecordsParam}`;
         console.log(`Fetching URL: ${requestUrl}`);
-        const response = await fetch(requestUrl, {
+        const data = await fetchWithRetry(requestUrl, {
           headers: {
             "Authorization": `Bearer ${accessToken}`,
             "Content-Type": "application/json"
           }
         });
-        console.log(`HTTP Response Status: ${response.status}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
         console.log(`Fetched ${data.records.length} records from Airtable`);
         allRecords = allRecords.concat(data.records);
+        recordsFetched += data.records.length;
         offset = data.offset;
-      } while (offset);
+        if (recordsFetched >= maxRecords) {
+          console.log("Reached maximum record limit.");
+          break;
+        }
+        figma.ui.postMessage({ type: "fetch-progress", fetched: recordsFetched, total: maxRecords });
+      } while (offset && recordsFetched < maxRecords);
       airtablePlugins = allRecords.map((record) => ({
         id: extractPluginIdFromUrl(record.fields["plugin-link"]) || record.id,
         // plugin-link에서 ID 추출 또는 fallback
@@ -4566,9 +4587,11 @@
       }));
       console.log("Fetched Airtable plugins:", airtablePlugins.length);
       console.log("Airtable Plugins:", airtablePlugins);
+      figma.ui.postMessage({ type: "fetch-complete" });
     } catch (error) {
       console.error("Error fetching Airtable data:", error);
       airtablePlugins = [];
+      figma.ui.postMessage({ type: "fetch-error", error: error instanceof Error ? error.message : "Unknown error" });
     }
   }
   async function searchPlugins(query) {
@@ -4640,8 +4663,12 @@
       console.error("Error syncing My Plugin List:", error);
     }
     try {
-      await fetchAllDataFromAirtable();
-      console.log("Airtable plugins fetched");
+      if (airtablePlugins.length === 0) {
+        await fetchAllDataFromAirtable();
+        console.log("Airtable plugins fetched");
+      } else {
+        console.log("Airtable plugins already loaded");
+      }
     } catch (error) {
       console.error("Error fetching Airtable plugins:", error);
     }
