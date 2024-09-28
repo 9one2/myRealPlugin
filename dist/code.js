@@ -4235,7 +4235,7 @@
     {
       id: "735098390272716381",
       pluginName: "Iconify",
-      pluginDescription: "Iconify brings a huge selection of icons to Figma.",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/735098390272716381/iconify",
       pluginIcon: iconify_default,
       categories: ["Icon"]
@@ -4243,7 +4243,7 @@
     {
       id: "843461159747178978",
       pluginName: "Feather Icon",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/843461159747178978/Figma-Tokens",
       pluginIcon: feather_default,
       categories: ["Icon"]
@@ -4251,7 +4251,7 @@
     {
       id: "740272380439725040",
       pluginName: "Material Design Icon",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/740272380439725040/material-design-icons",
       pluginIcon: material_default,
       categories: ["Icon"]
@@ -4259,7 +4259,7 @@
     {
       id: "738454987945972471",
       pluginName: "Unsplash",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/738454987945972471/unsplash",
       pluginIcon: unsplash_default,
       categories: ["Image"]
@@ -4267,7 +4267,7 @@
     {
       id: "1204029601871812061",
       pluginName: "Pixabay",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/1204029601871812061/pixabay",
       pluginIcon: pixbay_default,
       categories: ["Image"]
@@ -4275,7 +4275,7 @@
     {
       id: "829802086526281657",
       pluginName: "Pexel",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/829802086526281657/pexels",
       pluginIcon: pexel_default,
       categories: ["Image"]
@@ -4283,7 +4283,7 @@
     {
       id: "733902567457592893",
       pluginName: "Autoflow",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/733902567457592893/autoflow",
       pluginIcon: autoflow_default,
       categories: ["Utility"]
@@ -4291,7 +4291,7 @@
     {
       id: "738992712906748191",
       pluginName: "Remove BG",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/738992712906748191/remove-bg",
       pluginIcon: removeBG_default,
       categories: ["Utility"]
@@ -4299,7 +4299,7 @@
     {
       id: "736000994034548392",
       pluginName: "Lorem ipsum",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/736000994034548392/lorem-ipsum",
       pluginIcon: loremInpsum_default,
       categories: ["Utility"]
@@ -4307,7 +4307,7 @@
     {
       id: "817043359134136295",
       pluginName: "Mockup Plugin",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/817043359134136295/mockup-plugin-devices-mockups-print-mockups-ai-mockups",
       pluginIcon: mockup_default,
       categories: ["Mockup"]
@@ -4315,7 +4315,7 @@
     {
       id: "750673765607708804",
       pluginName: "Artboard Mockup",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/750673765607708804/artboard-mockups",
       pluginIcon: artboard_default,
       categories: ["Mockup"]
@@ -4323,7 +4323,7 @@
     {
       id: "819335598581469537",
       pluginName: "Clay Mockup",
-      pluginDescription: "MRP Recommand Plugins",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/819335598581469537/clay-mockups-3d",
       pluginIcon: clayMockup_default,
       categories: ["Mockup"]
@@ -4351,7 +4351,9 @@
         this.cache.delete(key);
       } else if (this.cache.size >= this.maxSize) {
         const oldestKey = this.cache.keys().next().value;
-        this.cache.delete(oldestKey);
+        if (oldestKey !== void 0) {
+          this.cache.delete(oldestKey);
+        }
       }
       this.cache.set(key, value);
     }
@@ -4361,10 +4363,17 @@
   var searchCache = new LRUCache(MAX_CACHE_SIZE);
   var myPluginList = [];
   async function initializeSize() {
-    const savedSize = await figma.clientStorage.getAsync("pluginSize");
-    if (savedSize) {
-      figma.ui.resize(savedSize.width, savedSize.height);
-    } else {
+    try {
+      const savedSize = await figma.clientStorage.getAsync("pluginSize");
+      if (savedSize) {
+        figma.ui.resize(savedSize.width, savedSize.height);
+        console.log(`UI resized to: ${savedSize.width}x${savedSize.height}`);
+      } else {
+        figma.ui.resize(500, 700);
+        console.log("UI resized to default: 500x700");
+      }
+    } catch (error) {
+      console.error("Error initializing UI size:", error);
       figma.ui.resize(500, 700);
     }
   }
@@ -4387,6 +4396,7 @@
         data: compressed.slice(i, i + chunkSize)
       });
     }
+    console.log(`Data compressed into ${chunks.length} chunks`);
     return chunks;
   }
   function decompressData(chunks) {
@@ -4396,13 +4406,14 @@
         return null;
       }
       chunks.sort((a, b) => a.part - b.part);
-      const fullData = new Uint8Array(chunks.reduce((acc, chunk) => acc + chunk.data.length, 0));
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.data.length, 0);
+      const fullData = new Uint8Array(totalLength);
       let offset = 0;
       for (const chunk of chunks) {
         fullData.set(chunk.data, offset);
         offset += chunk.data.length;
       }
-      console.log("Full data length:", fullData.length);
+      console.log("Full data length after concatenation:", fullData.length);
       if (fullData.length === 0) {
         console.log("Empty data to decompress");
         return null;
@@ -4410,6 +4421,7 @@
       let decompressed;
       try {
         decompressed = pako.inflate(fullData, { to: "string" });
+        console.log("Data decompressed successfully");
       } catch (inflateError) {
         console.error("Error inflating data:", inflateError);
         return null;
@@ -4423,6 +4435,7 @@
         console.log("Decompressed data is empty");
         return null;
       }
+      console.log("Parsed decompressed data:", trimmedData);
       return JSON.parse(trimmedData);
     } catch (error) {
       console.error("Error decompressing data:", error);
@@ -4435,22 +4448,26 @@
     let fileData = null;
     try {
       const compressedClientData = await figma.clientStorage.getAsync("compressedData");
+      console.log("Fetched compressed client data:", compressedClientData);
       if (compressedClientData && Array.isArray(compressedClientData) && compressedClientData.length > 0) {
         clientData = decompressData(compressedClientData);
+        console.log("Client data loaded:", clientData);
       } else {
         console.log("No valid client data found");
       }
-      console.log("Client data:", clientData);
     } catch (error) {
       console.log("Error fetching client data:", error);
     }
     try {
       const pluginData = figma.root.getPluginData("compressedData");
+      console.log("Fetched plugin data:", pluginData);
       if (pluginData && pluginData !== "undefined" && pluginData !== "") {
         try {
           const compressedFileData = JSON.parse(pluginData);
+          console.log("Parsed compressed file data:", compressedFileData);
           if (Array.isArray(compressedFileData) && compressedFileData.length > 0) {
             fileData = decompressData(compressedFileData);
+            console.log("File data loaded:", fileData);
           } else {
             console.log("Parsed plugin data is empty or not an array:", compressedFileData);
           }
@@ -4460,9 +4477,8 @@
       } else {
         console.log("No valid plugin data found");
       }
-      console.log("File data:", fileData);
     } catch (error) {
-      console.log("Error parsing file data:", error);
+      console.log("Error fetching plugin data:", error);
     }
     let updatedData;
     if (!clientData && !fileData) {
@@ -4479,18 +4495,17 @@
     } else {
       updatedData = clientData.lastUpdated > fileData.lastUpdated ? clientData : fileData;
     }
-    console.log("Using data:", updatedData);
+    console.log("Using data for My Plugin List:", updatedData);
     const compressedData = compressData(updatedData);
     if (compressedData.length > 0) {
       await figma.clientStorage.setAsync("compressedData", compressedData);
       figma.root.setPluginData("compressedData", JSON.stringify(compressedData));
+      console.log("Compressed data saved successfully");
     } else {
       console.log("No data to save");
     }
-    console.log("Synced My Plugin List:", updatedData);
-    myPluginList = updatedData.plugins.filter(function(plugin) {
-      return !plugin.hidden;
-    });
+    myPluginList = updatedData.plugins.filter((plugin) => !plugin.hidden);
+    console.log("Final My Plugin List:", myPluginList);
     return myPluginList;
   }
   async function saveMyPluginList(plugins) {
@@ -4500,38 +4515,53 @@
       lastUpdated: Date.now()
     };
     const compressedData = compressData(updatedData);
-    await figma.clientStorage.setAsync("compressedData", compressedData);
-    figma.root.setPluginData("compressedData", JSON.stringify(compressedData));
-    console.log("My Plugin List saved successfully");
+    if (compressedData.length > 0) {
+      await figma.clientStorage.setAsync("compressedData", compressedData);
+      figma.root.setPluginData("compressedData", JSON.stringify(compressedData));
+      console.log("My Plugin List saved successfully");
+    } else {
+      console.log("No data to save");
+    }
   }
   async function fetchAllDataFromAirtable() {
     console.log("Fetching all data from Airtable...");
     let allRecords = [];
     let offset;
-    do {
-      const requestUrl = `${url}?pageSize=100${offset ? `&offset=${offset}` : ""}`;
-      const response = await fetch(requestUrl, {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
+    try {
+      do {
+        const requestUrl = `${url}?pageSize=100${offset ? `&offset=${offset}` : ""}`;
+        console.log(`Fetching URL: ${requestUrl}`);
+        const response = await fetch(requestUrl, {
+          headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          }
+        });
+        console.log(`HTTP Response Status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      allRecords = allRecords.concat(data.records);
-      offset = data.offset;
-    } while (offset);
-    airtablePlugins = allRecords.map((record) => ({
-      id: record.fields["plugin-id"],
-      pluginName: record.fields["plugin-name"],
-      pluginDescription: record.fields["plugin-desc"] || "",
-      pluginUrl: record.fields["plugin-link"],
-      pluginIcon: record.fields["plugin-icon"],
-      categories: []
-    }));
-    console.log("Fetched Airtable plugins:", airtablePlugins.length);
+        const data = await response.json();
+        console.log(`Fetched ${data.records.length} records from Airtable`);
+        allRecords = allRecords.concat(data.records);
+        offset = data.offset;
+      } while (offset);
+      airtablePlugins = allRecords.map((record) => ({
+        id: record.fields["plugin-id"],
+        pluginName: record.fields["plugin-name"],
+        pluginDescription: record.fields["plugin-desc"] || "",
+        pluginUrl: record.fields["plugin-link"],
+        pluginIcon: record.fields["plugin-icon"],
+        // 다중 선택 처리: plugin-category가 배열인지 문자열인지 확인하고, string[]으로 변환
+        categories: Array.isArray(record.fields["plugin-category"]) ? record.fields["plugin-category"].filter((cat) => typeof cat === "string") : record.fields["plugin-category"] ? [record.fields["plugin-category"]] : ["Uncategorized"]
+        // plugin-category가 없을 경우 기본 카테고리 할당
+      }));
+      console.log("Fetched Airtable plugins:", airtablePlugins.length);
+      console.log("Airtable Plugins:", airtablePlugins);
+    } catch (error) {
+      console.error("Error fetching Airtable data:", error);
+      airtablePlugins = [];
+    }
   }
   async function searchPlugins(query) {
     console.log("Searching for query:", query);
@@ -4541,8 +4571,10 @@
       return cachedResults;
     }
     const lowercaseQuery = query.toLowerCase();
+    console.log("Lowercase query:", lowercaseQuery);
     const results = airtablePlugins.filter(
-      (plugin) => `${plugin.pluginName} ${plugin.pluginDescription}`.toLowerCase().includes(lowercaseQuery)
+      (plugin) => `${plugin.pluginName} ${plugin.pluginDescription} ${plugin.categories.join(" ")}`.toLowerCase().includes(lowercaseQuery) && !myPluginList.some((myPlugin) => myPlugin.id === plugin.id)
+      // 이미 추가된 플러그인 제외
     ).slice(0, 10);
     console.log("Search results:", results);
     searchCache.set(query, results);
@@ -4591,7 +4623,7 @@
   }
   async function initializePlugin() {
     console.log("Initializing plugin...");
-    figma.showUI(__html__, { width: 500, height: 600 });
+    figma.showUI(__html__, { width: 500, height: 700 });
     console.log("UI shown");
     try {
       await syncMyPluginList();
@@ -4605,8 +4637,12 @@
     } catch (error) {
       console.error("Error fetching Airtable plugins:", error);
     }
-    await initializeSize();
-    console.log("UI size initialized");
+    try {
+      await initializeSize();
+      console.log("UI size initialized");
+    } catch (error) {
+      console.error("Error initializing UI size:", error);
+    }
   }
   initializePlugin().then(() => {
     console.log("Plugin initialization complete");
@@ -4632,15 +4668,13 @@
           throw new Error("Failed to extract plugin information");
         }
         console.log("Successfully extracted plugin info:", pluginInfo);
-        const existingPluginIndex = myPluginList.findIndex(function(p) {
-          return p.id === pluginInfo.id;
-        });
+        const existingPluginIndex = myPluginList.findIndex((p) => p.id === pluginInfo.id);
         if (existingPluginIndex !== -1) {
           console.log("Updating existing plugin:", myPluginList[existingPluginIndex]);
           if (!myPluginList[existingPluginIndex].categories) {
             myPluginList[existingPluginIndex].categories = [];
           }
-          if (myPluginList[existingPluginIndex].categories.indexOf(msg.category) === -1) {
+          if (!myPluginList[existingPluginIndex].categories.includes(msg.category)) {
             myPluginList[existingPluginIndex].categories.push(msg.category);
           }
           myPluginList[existingPluginIndex].pluginName = msg.name;
@@ -4668,9 +4702,9 @@
       try {
         await syncMyPluginList();
         console.log("Retrieved My Plugin List:", myPluginList);
-        const flattenedPlugins = myPluginList.reduce(function(acc, plugin) {
+        const flattenedPlugins = myPluginList.reduce((acc, plugin) => {
           if (plugin && plugin.categories && Array.isArray(plugin.categories)) {
-            plugin.categories.forEach(function(category) {
+            plugin.categories.forEach((category) => {
               acc.push(Object.assign({}, plugin, { category }));
             });
           } else {
@@ -4678,6 +4712,7 @@
           }
           return acc;
         }, []);
+        console.log("Flattened plugins to send:", flattenedPlugins);
         figma.ui.postMessage({ type: "plugins-list", plugins: flattenedPlugins });
       } catch (error) {
         console.error("Error fetching plugins:", error);
@@ -4710,9 +4745,9 @@
         console.log("After deletion:", myPluginList);
         await saveMyPluginList(myPluginList);
         figma.notify("Plugin deleted successfully", { timeout: 2e3 });
-        const flattenedPlugins = myPluginList.reduce(function(acc, plugin) {
+        const flattenedPlugins = myPluginList.reduce((acc, plugin) => {
           if (plugin && plugin.categories && Array.isArray(plugin.categories)) {
-            plugin.categories.forEach(function(category) {
+            plugin.categories.forEach((category) => {
               acc.push(Object.assign({}, plugin, { category }));
             });
           } else {
@@ -4720,6 +4755,7 @@
           }
           return acc;
         }, []);
+        console.log("Flattened plugins after deletion:", flattenedPlugins);
         figma.ui.postMessage({ type: "plugins-list", plugins: flattenedPlugins });
       } catch (error) {
         console.error("Error deleting plugin:", error);
@@ -4767,15 +4803,13 @@
         if (!plugin || !msg.category) {
           throw new Error("Plugin data and category are required");
         }
-        const existingPluginIndex = myPluginList.findIndex(function(p) {
-          return p.id === plugin.id;
-        });
+        const existingPluginIndex = myPluginList.findIndex((p) => p.id === plugin.id);
         if (existingPluginIndex !== -1) {
           console.log("Updating existing plugin:", myPluginList[existingPluginIndex]);
           if (!myPluginList[existingPluginIndex].categories) {
             myPluginList[existingPluginIndex].categories = [];
           }
-          if (myPluginList[existingPluginIndex].categories.indexOf(msg.category) === -1) {
+          if (!myPluginList[existingPluginIndex].categories.includes(msg.category)) {
             myPluginList[existingPluginIndex].categories.push(msg.category);
           }
         } else {
