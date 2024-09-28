@@ -4234,8 +4234,8 @@
     // 기본 플러그인 목록
     {
       id: "735098390272716381",
-      pluginName: "Iconify",
-      pluginDescription: "MRP Recommend Plugins",
+      pluginName: "Icon\u3147\u3147\u3147\u3147\u3147ify",
+      pluginDescription: "Iconify brings a huge selection of icons to Figma.",
       pluginUrl: "https://www.figma.com/community/plugin/735098390272716381/iconify",
       pluginIcon: iconify_default,
       categories: ["Icon"]
@@ -4369,12 +4369,12 @@
         figma.ui.resize(savedSize.width, savedSize.height);
         console.log(`UI resized to: ${savedSize.width}x${savedSize.height}`);
       } else {
-        figma.ui.resize(500, 700);
-        console.log("UI resized to default: 500x700");
+        figma.ui.resize(500, 600);
+        console.log("UI resized to default: 500x600");
       }
     } catch (error) {
       console.error("Error initializing UI size:", error);
-      figma.ui.resize(500, 700);
+      figma.ui.resize(500, 600);
     }
   }
   function compressData(data) {
@@ -4441,6 +4441,14 @@
       console.error("Error decompressing data:", error);
       return null;
     }
+  }
+  function extractPluginIdFromUrl(url2) {
+    const regex = /\/plugin\/(\d+)/;
+    const match = url2.match(regex);
+    if (match && match[1]) {
+      return match[1];
+    }
+    return null;
   }
   async function syncMyPluginList() {
     console.log("Syncing My Plugin List...");
@@ -4547,14 +4555,14 @@
         offset = data.offset;
       } while (offset);
       airtablePlugins = allRecords.map((record) => ({
-        id: record.fields["plugin-id"],
+        id: extractPluginIdFromUrl(record.fields["plugin-link"]) || record.id,
+        // plugin-link에서 ID 추출 또는 fallback
         pluginName: record.fields["plugin-name"],
         pluginDescription: record.fields["plugin-desc"] || "",
         pluginUrl: record.fields["plugin-link"],
         pluginIcon: record.fields["plugin-icon"],
-        // 다중 선택 처리: plugin-category가 배열인지 문자열인지 확인하고, string[]으로 변환
-        categories: Array.isArray(record.fields["plugin-category"]) ? record.fields["plugin-category"].filter((cat) => typeof cat === "string") : record.fields["plugin-category"] ? [record.fields["plugin-category"]] : ["Uncategorized"]
-        // plugin-category가 없을 경우 기본 카테고리 할당
+        categories: []
+        // Airtable에 'plugin-category' 필드가 없으므로 빈 배열로 초기화
       }));
       console.log("Fetched Airtable plugins:", airtablePlugins.length);
       console.log("Airtable Plugins:", airtablePlugins);
@@ -4573,7 +4581,7 @@
     const lowercaseQuery = query.toLowerCase();
     console.log("Lowercase query:", lowercaseQuery);
     const results = airtablePlugins.filter(
-      (plugin) => `${plugin.pluginName} ${plugin.pluginDescription} ${plugin.categories.join(" ")}`.toLowerCase().includes(lowercaseQuery) && !myPluginList.some((myPlugin) => myPlugin.id === plugin.id)
+      (plugin) => `${plugin.pluginName} ${plugin.pluginDescription}`.toLowerCase().includes(lowercaseQuery) && !myPluginList.some((myPlugin) => myPlugin.id === plugin.id)
       // 이미 추가된 플러그인 제외
     ).slice(0, 10);
     console.log("Search results:", results);
@@ -4623,7 +4631,7 @@
   }
   async function initializePlugin() {
     console.log("Initializing plugin...");
-    figma.showUI(__html__, { width: 500, height: 700 });
+    figma.showUI(__html__, { width: 500, height: 600 });
     console.log("UI shown");
     try {
       await syncMyPluginList();
