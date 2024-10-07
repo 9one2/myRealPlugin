@@ -4235,7 +4235,7 @@
     {
       id: "735098390272716381",
       pluginName: "Iconify",
-      pluginDescription: "Iconify brings a huge selection of icons to Figma.",
+      pluginDescription: "MRP Recommend Plugins",
       pluginUrl: "https://www.figma.com/community/plugin/735098390272716381/iconify",
       pluginIcon: iconify_default,
       categories: ["Icon"]
@@ -4362,19 +4362,26 @@
   var MAX_CACHE_SIZE = 100;
   var searchCache = new LRUCache(MAX_CACHE_SIZE);
   var myPluginList = [];
+  var searchReady = false;
+  function updateSearchReadyState(state) {
+    searchReady = state;
+    figma.ui.postMessage({ type: "search-ready", ready: state });
+  }
   async function initializeSize() {
     try {
-      const savedSize = await figma.clientStorage.getAsync("pluginSize");
+      const savedSize = await figma.clientStorage.getAsync(
+        "pluginSize"
+      );
       if (savedSize) {
         figma.ui.resize(savedSize.width, savedSize.height);
         console.log(`UI resized to: ${savedSize.width}x${savedSize.height}`);
       } else {
-        figma.ui.resize(500, 600);
-        console.log("UI resized to default: 500x600");
+        figma.ui.resize(520, 680);
+        console.log("UI resized to default: 480x680");
       }
     } catch (error) {
       console.error("Error initializing UI size:", error);
-      figma.ui.resize(500, 600);
+      figma.ui.resize(520, 680);
     }
   }
   function compressData(data) {
@@ -4406,7 +4413,10 @@
         return null;
       }
       chunks.sort((a, b) => a.part - b.part);
-      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.data.length, 0);
+      const totalLength = chunks.reduce(
+        (acc, chunk) => acc + chunk.data.length,
+        0
+      );
       const fullData = new Uint8Array(totalLength);
       let offset = 0;
       for (const chunk of chunks) {
@@ -4454,7 +4464,8 @@
     for (let i = 0; i < retries; i++) {
       try {
         const response = await fetch(url2, options);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
       } catch (error) {
         console.warn(`Fetch attempt ${i + 1} failed: ${error}`);
@@ -4471,7 +4482,9 @@
     let clientData = null;
     let fileData = null;
     try {
-      const compressedClientData = await figma.clientStorage.getAsync("compressedData");
+      const compressedClientData = await figma.clientStorage.getAsync(
+        "compressedData"
+      );
       console.log("Fetched compressed client data:", compressedClientData);
       if (compressedClientData && Array.isArray(compressedClientData) && compressedClientData.length > 0) {
         clientData = decompressData(compressedClientData);
@@ -4493,7 +4506,10 @@
             fileData = decompressData(compressedFileData);
             console.log("File data loaded:", fileData);
           } else {
-            console.log("Parsed plugin data is empty or not an array:", compressedFileData);
+            console.log(
+              "Parsed plugin data is empty or not an array:",
+              compressedFileData
+            );
           }
         } catch (parseError) {
           console.error("Error parsing plugin data:", parseError);
@@ -4549,6 +4565,8 @@
   }
   async function fetchAllDataFromAirtable(maxRecords = 2e3) {
     console.log("Fetching all data from Airtable...");
+    figma.ui.postMessage({ type: "fetch-start" });
+    updateSearchReadyState(false);
     let allRecords = [];
     let offset;
     let recordsFetched = 0;
@@ -4561,7 +4579,7 @@
         console.log(`Fetching URL: ${requestUrl}`);
         const data = await fetchWithRetry(requestUrl, {
           headers: {
-            "Authorization": `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json"
           }
         });
@@ -4573,7 +4591,11 @@
           console.log("Reached maximum record limit.");
           break;
         }
-        figma.ui.postMessage({ type: "fetch-progress", fetched: recordsFetched, total: maxRecords });
+        figma.ui.postMessage({
+          type: "fetch-progress",
+          fetched: recordsFetched,
+          total: maxRecords
+        });
       } while (offset && recordsFetched < maxRecords);
       airtablePlugins = allRecords.map((record) => ({
         id: extractPluginIdFromUrl(record.fields["plugin-link"]) || record.id,
@@ -4588,10 +4610,15 @@
       console.log("Fetched Airtable plugins:", airtablePlugins.length);
       console.log("Airtable Plugins:", airtablePlugins);
       figma.ui.postMessage({ type: "fetch-complete" });
+      updateSearchReadyState(true);
     } catch (error) {
       console.error("Error fetching Airtable data:", error);
       airtablePlugins = [];
-      figma.ui.postMessage({ type: "fetch-error", error: error instanceof Error ? error.message : "Unknown error" });
+      figma.ui.postMessage({
+        type: "fetch-error",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+      updateSearchReadyState(false);
     }
   }
   async function searchPlugins(query) {
@@ -4615,10 +4642,7 @@
     console.log("Extracting plugin info from URL:", url2);
     const normalizedUrl = url2.trim().toLowerCase();
     console.log("Normalized URL:", normalizedUrl);
-    const patterns = [
-      /\/plugin\/(\d+)(?:\/([^/?]+))?/,
-      /\/plugin\/(\d+)/
-    ];
+    const patterns = [/\/plugin\/(\d+)(?:\/([^/?]+))?/, /\/plugin\/(\d+)/];
     let match = null;
     for (const pattern of patterns) {
       match = normalizedUrl.match(pattern);
@@ -4632,7 +4656,9 @@
     const [, id, nameFromUrl] = match;
     let pluginName = customName || (nameFromUrl ? decodeURIComponent(nameFromUrl.replace(/-/g, " ")) : "");
     if (!pluginName) {
-      console.log('Name not found in URL and no custom name provided, using "Unknown Plugin"');
+      console.log(
+        'Name not found in URL and no custom name provided, using "Unknown Plugin"'
+      );
       pluginName = "Unknown Plugin";
     }
     console.log("Extracted plugin info:", { id, pluginName, description });
@@ -4656,6 +4682,7 @@
     console.log("Initializing plugin...");
     figma.showUI(__html__, { width: 500, height: 600 });
     console.log("UI shown");
+    updateSearchReadyState(false);
     try {
       await syncMyPluginList();
       console.log("My Plugin List synced");
@@ -4668,6 +4695,7 @@
         console.log("Airtable plugins fetched");
       } else {
         console.log("Airtable plugins already loaded");
+        updateSearchReadyState(true);
       }
     } catch (error) {
       console.error("Error fetching Airtable plugins:", error);
@@ -4687,25 +4715,38 @@
   figma.ui.onmessage = async (msg) => {
     console.log("Received message:", msg);
     if (msg.type === "resize") {
-      const width = Math.max(400, Math.round(msg.width || 0));
-      const height = Math.max(400, Math.round(msg.height || 0));
+      const width = Math.max(500, Math.round(msg.width || 0));
+      const height = Math.max(500, Math.round(msg.height || 0));
       console.log("Resizing to:", width, height);
       figma.ui.resize(width, height);
-      await figma.clientStorage.setAsync("pluginSize", { width, height });
+      await figma.clientStorage.setAsync("pluginSize", {
+        width,
+        height
+      });
     } else if (msg.type === "add-plugin") {
       try {
         if (!msg.url || !msg.category || !msg.name) {
           throw new Error("URL, name, and category are required");
         }
         console.log("Attempting to extract plugin info from URL:", msg.url);
-        const pluginInfo = extractPluginInfo(msg.url, msg.category, msg.description, msg.name);
+        const pluginInfo = extractPluginInfo(
+          msg.url,
+          msg.category,
+          msg.description,
+          msg.name
+        );
         if (!pluginInfo) {
           throw new Error("Failed to extract plugin information");
         }
         console.log("Successfully extracted plugin info:", pluginInfo);
-        const existingPluginIndex = myPluginList.findIndex((p) => p.id === pluginInfo.id);
+        const existingPluginIndex = myPluginList.findIndex(
+          (p) => p.id === pluginInfo.id
+        );
         if (existingPluginIndex !== -1) {
-          console.log("Updating existing plugin:", myPluginList[existingPluginIndex]);
+          console.log(
+            "Updating existing plugin:",
+            myPluginList[existingPluginIndex]
+          );
           if (!myPluginList[existingPluginIndex].categories) {
             myPluginList[existingPluginIndex].categories = [];
           }
@@ -4731,7 +4772,10 @@
         figma.ui.postMessage({ type: "plugin-added", plugin: pluginInfo });
       } catch (error) {
         console.error("Error adding plugin:", error);
-        figma.notify("Error adding plugin: " + (error instanceof Error ? error.message : "An unknown error occurred"), { error: true });
+        figma.notify(
+          "Error adding plugin: " + (error instanceof Error ? error.message : "An unknown error occurred"),
+          { error: true }
+        );
       }
     } else if (msg.type === "get-plugins") {
       try {
@@ -4751,7 +4795,10 @@
         figma.ui.postMessage({ type: "plugins-list", plugins: flattenedPlugins });
       } catch (error) {
         console.error("Error fetching plugins:", error);
-        figma.notify("Error fetching plugins: " + (error instanceof Error ? error.message : "Failed to fetch plugins"), { error: true });
+        figma.notify(
+          "Error fetching plugins: " + (error instanceof Error ? error.message : "Failed to fetch plugins"),
+          { error: true }
+        );
       }
     } else if (msg.type === "open-plugin-page") {
       if (msg.url) {
@@ -4770,7 +4817,9 @@
         console.log("Before deletion:", myPluginList);
         myPluginList = myPluginList.map((plugin) => {
           if (plugin.id === msg.pluginId) {
-            plugin.categories = plugin.categories.filter((cat) => cat !== msg.category);
+            plugin.categories = plugin.categories.filter(
+              (cat) => cat !== msg.category
+            );
             if (plugin.categories.length === 0) {
               return null;
             }
@@ -4794,7 +4843,10 @@
         figma.ui.postMessage({ type: "plugins-list", plugins: flattenedPlugins });
       } catch (error) {
         console.error("Error deleting plugin:", error);
-        figma.notify("Error deleting plugin: " + (error instanceof Error ? error.message : "An unknown error occurred"), { error: true });
+        figma.notify(
+          "Error deleting plugin: " + (error instanceof Error ? error.message : "An unknown error occurred"),
+          { error: true }
+        );
       }
     } else if (msg.type === "notify") {
       figma.notify(msg.message || "", { timeout: 2e3 });
@@ -4803,6 +4855,9 @@
         console.log("Received search request:", msg.query);
         if (!msg.query) {
           throw new Error("Search query is required");
+        }
+        if (!searchReady) {
+          throw new Error("Search function is not ready yet");
         }
         const searchResults = await searchPlugins(msg.query);
         console.log("Search results to be sent to UI:", searchResults);
@@ -4819,8 +4874,14 @@
         });
       } catch (error) {
         console.error("Error searching plugins:", error);
-        figma.notify("Error searching plugins: " + (error instanceof Error ? error.message : "An unknown error occurred"), { error: true });
-        figma.ui.postMessage({ type: "search-error", error: error instanceof Error ? error.message : "An unknown error occurred" });
+        figma.notify(
+          "Error searching plugins: " + (error instanceof Error ? error.message : "An unknown error occurred"),
+          { error: true }
+        );
+        figma.ui.postMessage({
+          type: "search-error",
+          error: error instanceof Error ? error.message : "An unknown error occurred"
+        });
       }
     } else if (msg.type === "add-plugin-from-search") {
       try {
@@ -4830,7 +4891,10 @@
         figma.ui.postMessage({ type: "show-category-modal", plugin: msg.plugin });
       } catch (error) {
         console.error("Error adding plugin from search:", error);
-        figma.notify("Error adding plugin: " + (error instanceof Error ? error.message : "An unknown error occurred"), { error: true });
+        figma.notify(
+          "Error adding plugin: " + (error instanceof Error ? error.message : "An unknown error occurred"),
+          { error: true }
+        );
       }
     } else if (msg.type === "confirm-add-plugin") {
       try {
@@ -4838,9 +4902,14 @@
         if (!plugin || !msg.category) {
           throw new Error("Plugin data and category are required");
         }
-        const existingPluginIndex = myPluginList.findIndex((p) => p.id === plugin.id);
+        const existingPluginIndex = myPluginList.findIndex(
+          (p) => p.id === plugin.id
+        );
         if (existingPluginIndex !== -1) {
-          console.log("Updating existing plugin:", myPluginList[existingPluginIndex]);
+          console.log(
+            "Updating existing plugin:",
+            myPluginList[existingPluginIndex]
+          );
           if (!myPluginList[existingPluginIndex].categories) {
             myPluginList[existingPluginIndex].categories = [];
           }
@@ -4864,7 +4933,10 @@
         figma.ui.postMessage({ type: "plugin-added", plugin });
       } catch (error) {
         console.error("Error confirming plugin addition:", error);
-        figma.notify("Error adding plugin: " + (error instanceof Error ? error.message : "An unknown error occurred"), { error: true });
+        figma.notify(
+          "Error adding plugin: " + (error instanceof Error ? error.message : "An unknown error occurred"),
+          { error: true }
+        );
       }
     } else if (msg.type === "get-default-plugins") {
       console.log("Received get-default-plugins request");
