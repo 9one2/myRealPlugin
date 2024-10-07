@@ -259,8 +259,8 @@
         border: 4px solid #f3f3f3;
         border-top: 4px solid #090909;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        width: 16px;
+        height: 16px;
         animation: spin 1s linear infinite;
       }
 
@@ -346,9 +346,9 @@
           </button>
         </div>
         <!-- 로딩 상태 표시 -->
-        <div id="search-loading" style="display: none; text-align: center">
-          <p>검색 기능을 준비하고 있습니다</p>
+        <div id="search-loading" style="display: none; text-align: center; align-items: center; gap: 8px; justify-content: center;">
           <div class="spinner"></div>
+          <p>검색 기능을 준비하고 있습니다</p>
         </div>
         <div id="category-chips"></div>
         <div id="loading-spinner">
@@ -356,13 +356,13 @@
         </div>
         <div id="default-plugin-list"></div>
         <!-- 검색 결과가 없을 때 표시될 영역 -->
-        <div id="no-results" style="display: none; text-align: center">
+        <div id="no-results" style="display: none; text-align: center; margin: 40px 0 40px 0;">
           <img
-            src="no-results-illustration.png"
+            src="data:image/png;base64,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"
             alt="No results"
-            style="width: 100px; height: 100px"
+            style="width: 80px; height: 80px"
           />
-          <p>검색 결과가 없습니다</p>
+          <p>No Results</p>
         </div>
         <div style="margin-top: 20px; text-align: center">
           <button
@@ -1069,9 +1069,9 @@
               searchReady = message.ready;
               searchInput.disabled = !searchReady;
               document.getElementById("search-loading").style.display =
-                searchReady ? "none" : "block";
+                searchReady ? "none" : "flex";
             } else if (message.type === "fetch-start") {
-              document.getElementById("search-loading").style.display = "block";
+              document.getElementById("search-loading").style.display = "flex";
             } else if (message.type === "fetch-complete") {
               document.getElementById("search-loading").style.display = "none";
             }
