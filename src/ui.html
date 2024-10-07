@@ -179,6 +179,9 @@
         padding: 6px 10px;
         cursor: pointer;
         font-size: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
       }
 
       .category-chip.selected {
@@ -361,7 +364,10 @@
           <div class="spinner"></div>
           <p>검색 기능을 준비하고 있습니다</p>
         </div>
-        <div id="category-chips"></div>
+        <div
+          style="display: flex; flex-wrap: wrap; gap: 6px"
+          id="category-chips"
+        ></div>
         <div id="loading-spinner">
           <div class="spinner"></div>
         </div>
@@ -814,7 +820,7 @@
             );
           } else {
             hideLoadingSpinner();
-            document.getElementById("category-chips").style.display = "block";
+            document.getElementById("category-chips").style.display = "flex";
             currentDisplayedPlugins = defaultPlugins;
             renderDefaultPluginList(defaultPlugins);
             updateCategoryChips(defaultPlugins, "home");
@@ -838,7 +844,7 @@
           console.log("Search reset button clicked");
           searchInput.value = "";
           searchResetButton.style.display = "none";
-          document.getElementById("category-chips").style.display = "block";
+          document.getElementById("category-chips").style.display = "flex";
           currentDisplayedPlugins = defaultPlugins;
           renderDefaultPluginList(defaultPlugins);
           updateCategoryChips(defaultPlugins, "home");
