@@ -44,8 +44,6 @@ interface AirtableRecord {
     "plugin-desc"?: string;
     "plugin-link": string;
     "plugin-icon": string;
-    // 'plugin-id': string; // Airtable에 존재하지 않으므로 제거
-    // 'plugin-category'?: string | string[]; // Airtable에 존재하지 않으므로 제거
   };
 }
 
@@ -224,25 +222,6 @@ let searchReady = false; // 검색 가능 여부 상태 변수
 function updateSearchReadyState(state: boolean) {
   searchReady = state;
   figma.ui.postMessage({ type: "search-ready", ready: state });
-}
-
-// 초기 크기 설정
-async function initializeSize() {
-  try {
-    const savedSize = (await figma.clientStorage.getAsync(
-      "pluginSize"
-    )) as PluginSize;
-    if (savedSize) {
-      figma.ui.resize(savedSize.width, savedSize.height);
-      console.log(`UI resized to: ${savedSize.width}x${savedSize.height}`);
-    } else {
-      figma.ui.resize(520, 680);
-      console.log("UI resized to default: 480x680");
-    }
-  } catch (error) {
-    console.error("Error initializing UI size:", error);
-    figma.ui.resize(520, 680); // Fallback size
-  }
 }
 
 // 데이터 압축
@@ -654,8 +633,29 @@ function extractPluginInfo(
 async function initializePlugin() {
   console.log("Initializing plugin...");
 
-  // UI 표시
-  figma.showUI(__html__, { width: 500, height: 600 });
+  // 저장된 사이즈 가져오기
+  let savedSize: PluginSize;
+  try {
+    savedSize = (await figma.clientStorage.getAsync(
+      "pluginSize"
+    )) as PluginSize;
+    if (savedSize) {
+      console.log(
+        `UI will be resized to saved size: ${savedSize.width}x${savedSize.height}`
+      );
+    } else {
+      // 저장된 사이즈가 없으면 기본 사이즈 사용
+      savedSize = { width: 500, height: 600 };
+      console.log("No saved size found, using default size");
+    }
+  } catch (error) {
+    console.error("Error initializing UI size:", error);
+    // 오류 발생 시 기본 사이즈 사용
+    savedSize = { width: 500, height: 600 };
+  }
+
+  // UI 표시 (저장된 사이즈 적용)
+  figma.showUI(__html__, { width: savedSize.width, height: savedSize.height });
   console.log("UI shown");
 
   // 검색 기능 비활성화 상태로 초기화
@@ -684,13 +684,7 @@ async function initializePlugin() {
     console.error("Error fetching Airtable plugins:", error);
   }
 
-  // UI 크기 초기화
-  try {
-    await initializeSize();
-    console.log("UI size initialized");
-  } catch (error) {
-    console.error("Error initializing UI size:", error);
-  }
+  // UI 크기 초기화 함수 호출 필요 없음
 }
 
 // 메인 실행 코드

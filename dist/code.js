@@ -4367,23 +4367,6 @@
     searchReady = state;
     figma.ui.postMessage({ type: "search-ready", ready: state });
   }
-  async function initializeSize() {
-    try {
-      const savedSize = await figma.clientStorage.getAsync(
-        "pluginSize"
-      );
-      if (savedSize) {
-        figma.ui.resize(savedSize.width, savedSize.height);
-        console.log(`UI resized to: ${savedSize.width}x${savedSize.height}`);
-      } else {
-        figma.ui.resize(520, 680);
-        console.log("UI resized to default: 480x680");
-      }
-    } catch (error) {
-      console.error("Error initializing UI size:", error);
-      figma.ui.resize(520, 680);
-    }
-  }
   function compressData(data) {
     if (!data) {
       console.log("No data to compress");
@@ -4680,7 +4663,24 @@
   }
   async function initializePlugin() {
     console.log("Initializing plugin...");
-    figma.showUI(__html__, { width: 500, height: 600 });
+    let savedSize;
+    try {
+      savedSize = await figma.clientStorage.getAsync(
+        "pluginSize"
+      );
+      if (savedSize) {
+        console.log(
+          `UI will be resized to saved size: ${savedSize.width}x${savedSize.height}`
+        );
+      } else {
+        savedSize = { width: 500, height: 600 };
+        console.log("No saved size found, using default size");
+      }
+    } catch (error) {
+      console.error("Error initializing UI size:", error);
+      savedSize = { width: 500, height: 600 };
+    }
+    figma.showUI(__html__, { width: savedSize.width, height: savedSize.height });
     console.log("UI shown");
     updateSearchReadyState(false);
     try {
@@ -4699,12 +4699,6 @@
       }
     } catch (error) {
       console.error("Error fetching Airtable plugins:", error);
-    }
-    try {
-      await initializeSize();
-      console.log("UI size initialized");
-    } catch (error) {
-      console.error("Error initializing UI size:", error);
     }
   }
   initializePlugin().then(() => {
