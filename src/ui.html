@@ -333,6 +333,12 @@
         box-shadow: 0px 0px 16px 2px rgb(65 100 155 / 50%);
         cursor: pointer;
       }
+
+
+      .modal-plugin-url {background-color: #ddd;}
+
+
+
     </style>
     <script src="https://unpkg.com/feather-icons"></script>
   </head>
@@ -376,10 +382,19 @@
           <div class="spinner"></div>
         </div>
         <div id="default-plugin-list"></div>
+        <!-- 검색 결과가 없을 때 표시될 영역 -->
         <div
-          id="surveyBtnDiv"
-          style="margin-top: 20px; text-align: center; margin-bottom: 55px"
+          id="no-results"
+          style="display: none; text-align: center; margin: 40px 0 40px 0"
         >
+          <img
+            src="data:image/png;base64,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"
+            alt="No results"
+            style="width: 80px; height: 80px"
+          />
+          <p>No Results</p>
+        </div>
+        <div style="margin-top: 20px; text-align: center; margin-bottom: 80px">
           <button
             id="survey-button"
             type="button"
@@ -402,18 +417,6 @@
             <i data-feather="arrow-right" stroke="#fff" stroke-width="1.5"></i>
           </button>
         </div>
-        <!-- 검색 결과가 없을 때 표시될 영역 -->
-        <div
-          id="no-results"
-          style="display: none; text-align: center; margin: 40px 0 40px 0"
-        >
-          <img
-            src="data:image/png;base64,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"
-            alt="No results"
-            style="width: 80px; height: 80px"
-          />
-          <p>No Results</p>
-        </div>
       </div>
       <div id="plugin-list" class="content">
         <div
@@ -424,80 +427,66 @@
       </div>
     </div>
 
+    <!-- 기존 URL로 등록할 때 사용하는 모달 -->
+    <div id="add-plugin-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add Plugin</h2>
+        <input id="modal-plugin-url" type="text" placeholder="Plugin URL" />
+        <div class="autocomplete-wrapper">
+          <input
+            id="modal-plugin-category"
+            type="text"
+            placeholder="Write New Category or Select category"
+            required
+          />
+          <div
+            id="modal-category-dropdown"
+            class="autocomplete-dropdown"
+            style="display: none"
+          ></div>
+        </div>
+        <input
+          id="modal-plugin-name"
+          type="text"
+          placeholder="Plugin Name (optional)"
+        />
+        <textarea
+          id="modal-plugin-description"
+          placeholder="Enter plugin description (optional)"
+          rows="3"
+        ></textarea>
+        <button id="modal-add-plugin">Add Plugin</button>
+      </div>
+    </div>
+
+    <!-- 새로운 기본 플러그인 등록용 모달 -->
+    <div id="add-plugin-modal-default" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add Plugin</h2>
+        <!-- 플러그인 URL을 숨김 필드로 저장 -->
+        <input id="modal-default-plugin-url" type="hidden" />
+        <div class="autocomplete-wrapper">
+          <input
+            id="modal-default-plugin-category"
+            type="text"
+            placeholder="Write New Category or Select category"
+            required
+          />
+          <div
+            id="modal-default-category-dropdown"
+            class="autocomplete-dropdown"
+            style="display: none"
+          ></div>
+        </div>
+        <button id="modal-add-plugin-default">Add Plugin</button>
+      </div>
+    </div>
+
     <button class="floating-add-button" id="floating-add-button">
       <i data-feather="plus" stroke="#fff" stroke-width="2"></i> Add with URL
     </button>
-
-    <div id="add-plugin-modal" class="modal">
-      <div class="modal-content">
-        <div
-          class="modalTitleWrap"
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          "
-        >
-          <h2 style="font-size: 20px">Add Plugin</h2>
-          <sapn class="close">
-            <i
-              data-feather="x"
-              stroke="#96a1aa"
-              stroke-width="2"
-              width="24"
-              height="24"
-              >&times;</i
-            >
-          </sapn>
-        </div>
-        <div
-          class="inputWrap"
-          style="display: flex; flex-direction: column; gap: 12px"
-        >
-          <input id="modal-plugin-url" type="text" placeholder="Plugin URL" />
-          <div class="autocomplete-wrapper">
-            <input
-              id="modal-plugin-category"
-              type="text"
-              placeholder="Enter or select category"
-              required
-            />
-            <div
-              id="modal-category-dropdown"
-              class="autocomplete-dropdown"
-              style="display: none"
-            ></div>
-          </div>
-          <input
-            id="modal-plugin-name"
-            type="text"
-            placeholder="Plugin Name (optional)"
-          />
-          <textarea
-            id="modal-plugin-description"
-            placeholder="Enter plugin description (optional)"
-            rows="3"
-          ></textarea>
-        </div>
-
-        <button
-          id="modal-add-plugin"
-          style="
-            padding: 16px;
-            background-color: coral;
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-weight: 600;
-            font-size: 16px;
-            width: 100%;
-            margin-top: 20px;
-          "
-        >
-          Add Plugin
-        </button>
-      </div>
-    </div>
 
     <div id="toast"></div>
 
@@ -519,9 +508,27 @@
         );
         const modalAddPluginButton =
           document.getElementById("modal-add-plugin");
-        const modalCloseButton = document.querySelector(".close");
+        const modalCloseButtons = document.querySelectorAll(".close");
         const floatingAddButton = document.getElementById(
           "floating-add-button"
+        );
+
+        // 모달 관련 요소
+        const addPluginModal = document.getElementById("add-plugin-modal");
+        const addPluginModalDefault = document.getElementById(
+          "add-plugin-modal-default"
+        );
+        const modalAddPluginDefaultButton = document.getElementById(
+          "modal-add-plugin-default"
+        );
+        const modalDefaultPluginCategoryInput = document.getElementById(
+          "modal-default-plugin-category"
+        );
+        const modalDefaultCategoryDropdown = document.getElementById(
+          "modal-default-category-dropdown"
+        );
+        const modalDefaultPluginURL = document.getElementById(
+          "modal-default-plugin-url"
         );
 
         // 탭 전환
@@ -702,23 +709,23 @@
                 ${
                   context === "my-plugins"
                     ? `
-                      <button  class="delete-button" title="Delete plugin">
-                        <i data-feather="trash-2" stroke="#96a1aa" stroke-width="1.5"></i>
-                      </button>
-                      `
+                    <button  class="delete-button" title="Delete plugin">
+                      <i data-feather="trash-2" stroke="#96a1aa" stroke-width="1.5"></i>
+                    </button>
+                    `
                     : `
-                      <button class="add-to-my-plugins ${
-                        isAdded ? "added" : ""
-                      }" title="${
-                        isAdded ? "Added" : "Add to My Plugins"
-                      }" style="white-space: nowrap;">
-                        ${
-                          isAdded
-                            ? '<i data-feather="check" stroke="#96a1aa" stroke-width="2" width="24" height="24"></i>'
-                            : `<i data-feather="plus" stroke="#96a1aa" stroke-width="1.5" width="20" height="20"></i> Add to list`
-                        }
-                      </button>
-                      `
+                    <button class="add-to-my-plugins ${
+                      isAdded ? "added" : ""
+                    }" title="${
+                      isAdded ? "Added" : "Add to My Plugins"
+                    }" style="white-space: nowrap;">
+                      ${
+                        isAdded
+                          ? '<i data-feather="check" stroke="#96a1aa" stroke-width="2" width="24" height="24"></i>'
+                          : `<i data-feather="plus" stroke="#96a1aa" stroke-width="1.5" width="20" height="20"></i> Add to list`
+                      }
+                    </button>
+                    `
                 }
               </div>
           `;
@@ -727,23 +734,23 @@
             if (context !== "my-plugins") {
               const addButton = item.querySelector(".add-to-my-plugins");
               if (isAdded) {
-                addButton.classList.add("added-button");
-                addButton.disabled = true;
+                addButton.classList.add("added-button", "added");
               } else {
-                addButton.classList.remove("added-button");
-                addButton.disabled = false;
+                addButton.classList.remove("added-button", "added");
               }
 
               // 'Add to My Plugins' 버튼 클릭 핸들러
               addButton.addEventListener("click", (e) => {
+                if (addButton.classList.contains("added")) {
+                  e.preventDefault();
+                  return; // 이미 추가된 플러그인이므로 동작하지 않음
+                }
                 e.stopPropagation();
-                console.log(
-                  `Add button clicked for plugin: ${plugin.pluginName}`
-                );
+                console.log(`Add button clicked for plugin: ${plugin.pluginName}`);
                 // 선택된 플러그인을 저장
                 selectedPlugin = plugin;
-                // 모달 표시
-                showAddPluginModalWithPlugin(plugin);
+                // 모달 표시 (기본 플러그인 등록용 모달)
+                showAddPluginModalDefault(plugin);
               });
             } else {
               // Delete 버튼 클릭 핸들러
@@ -925,13 +932,13 @@
           document.getElementById("category-chips").style.display = "none";
         }
 
-        // Floating Add Button 클릭 핸들러
+        // Floating Add Button 클릭 핸들러 (URL로 직접 등록)
         floatingAddButton.onclick = () => {
           console.log("Floating Add Button clicked");
           showAddPluginModal();
         };
 
-        // Add Plugin Modal 표시
+        // Add Plugin Modal 표시 (URL로 직접 등록)
         function showAddPluginModal() {
           selectedPlugin = null; // 선택된 플러그인을 초기화
           const modal = document.getElementById("add-plugin-modal");
@@ -940,24 +947,39 @@
           document.getElementById("modal-plugin-description").value = "";
           document.getElementById("modal-plugin-category").value = "";
           modal.style.display = "block";
-          console.log("Add Plugin Modal displayed");
+          console.log("Add Plugin Modal (URL) displayed");
         }
 
-        // Modal 닫기 핸들러
-        modalCloseButton.onclick = function () {
-          console.log("Modal close button clicked");
-          document.getElementById("add-plugin-modal").style.display = "none";
-        };
+        // Add Plugin Modal 표시 (기본 플러그인 목록에서 등록)
+        function showAddPluginModalDefault(plugin) {
+          const modal = document.getElementById("add-plugin-modal-default");
+          // 플러그인 URL을 숨김 필드에 설정
+          modalDefaultPluginURL.value = plugin.pluginUrl;
+          document.getElementById("modal-default-plugin-category").value = "";
+          modal.style.display = "block";
+          console.log("Add Plugin Modal (Default) displayed with plugin:", plugin);
+        }
 
+        // 모든 모달 닫기 핸들러
+        modalCloseButtons.forEach((closeButton) => {
+          closeButton.onclick = function () {
+            console.log("Modal close button clicked");
+            closeButton.parentElement.parentElement.style.display = "none";
+          };
+        });
+
+        // 창 밖 클릭 시 모달 닫기
         window.onclick = function (event) {
-          const modal = document.getElementById("add-plugin-modal");
-          if (event.target == modal) {
-            console.log("Clicked outside modal, closing modal");
-            modal.style.display = "none";
-          }
+          const modals = document.querySelectorAll(".modal");
+          modals.forEach((modal) => {
+            if (event.target == modal) {
+              console.log("Clicked outside modal, closing modal");
+              modal.style.display = "none";
+            }
+          });
         };
 
-        // Modal Add Plugin 버튼 클릭 핸들러
+        // Modal Add Plugin 버튼 클릭 핸들러 (URL로 직접 등록)
         modalAddPluginButton.onclick = function () {
           const name = document
             .getElementById("modal-plugin-name")
@@ -994,10 +1016,40 @@
           console.log("Sending add-plugin message:", pluginInfo);
           parent.postMessage({ pluginMessage: pluginInfo }, "*");
           document.getElementById("add-plugin-modal").style.display = "none";
-          console.log("Add Plugin Modal closed");
+          console.log("Add Plugin Modal (URL) closed");
         };
 
-        // Modal용 Category Dropdown 업데이트
+        // Modal Add Plugin 버튼 클릭 핸들러 (기본 플러그인 목록에서 등록)
+        modalAddPluginDefaultButton.onclick = function () {
+          const category = document
+            .getElementById("modal-default-plugin-category")
+            .value.trim();
+          const url = modalDefaultPluginURL.value.trim();
+
+          console.log("Modal Add Plugin Default button clicked with:", {
+            category,
+            url,
+          });
+
+          if (!category) {
+            showToast("Category is required");
+            console.warn("Category is missing in add plugin confirmation");
+            return;
+          }
+
+          const pluginInfo = {
+            type: "add-plugin-default",
+            url: url,
+            category: category,
+          };
+
+          console.log("Sending add-plugin-default message:", pluginInfo);
+          parent.postMessage({ pluginMessage: pluginInfo }, "*");
+          document.getElementById("add-plugin-modal-default").style.display = "none";
+          console.log("Add Plugin Modal (Default) closed");
+        };
+
+        // Modal용 Category Dropdown 업데이트 (URL로 직접 등록)
         function updateModalCategoryDropdown() {
           const dropdown = document.getElementById("modal-category-dropdown");
           dropdown.innerHTML = "";
@@ -1014,7 +1066,7 @@
           });
         }
 
-        // Modal Category 선택
+        // Modal Category 선택 (URL로 직접 등록)
         function selectModalCategory(category) {
           console.log("Category selected from modal dropdown:", category);
           document.getElementById("modal-plugin-category").value = category;
@@ -1022,7 +1074,7 @@
             "none";
         }
 
-        // Modal Plugin Category 입력 이벤트
+        // Modal Plugin Category 입력 이벤트 (URL로 직접 등록)
         document
           .getElementById("modal-plugin-category")
           .addEventListener("input", function () {
@@ -1068,6 +1120,59 @@
               filteredCategories.length || inputValue ? "block" : "none";
           });
 
+        // Modal Plugin Category 입력 이벤트 (기본 플러그인 목록에서 등록)
+        modalDefaultPluginCategoryInput.addEventListener("input", function () {
+          const inputValue = this.value.trim().toLowerCase();
+          const dropdown = document.getElementById("modal-default-category-dropdown");
+          dropdown.innerHTML = "";
+          const allCategories = Array.from(
+            new Set([...existingCategories, ...existingCategoriesMyPlugins])
+          );
+          console.log("Modal default category input changed:", inputValue);
+
+          const filteredCategories = allCategories.filter((category) =>
+            category.toLowerCase().includes(inputValue)
+          );
+          console.log(
+            "Filtered categories for modal default dropdown:",
+            filteredCategories
+          );
+
+          if (
+            inputValue &&
+            !allCategories.some((cat) => cat.toLowerCase() === inputValue)
+          ) {
+            const newItem = document.createElement("div");
+            newItem.className = "autocomplete-item";
+            newItem.textContent = `Add "${this.value.trim()}"`;
+            newItem.onclick = () => selectModalDefaultCategory(this.value.trim());
+            dropdown.appendChild(newItem);
+            console.log(
+              `Added new category option: Add "${this.value.trim()}"`
+            );
+          }
+
+          filteredCategories.forEach((category) => {
+            const item = document.createElement("div");
+            item.className = "autocomplete-item";
+            item.textContent = category;
+            item.onclick = () => selectModalDefaultCategory(category);
+            dropdown.appendChild(item);
+          });
+
+          dropdown.style.display =
+            filteredCategories.length || inputValue ? "block" : "none";
+        });
+
+        // Modal Category 선택 (기본 플러그인 목록에서 등록)
+        function selectModalDefaultCategory(category) {
+          console.log("Category selected from default modal dropdown:", category);
+          document.getElementById("modal-default-plugin-category").value = category;
+          document.getElementById("modal-default-category-dropdown").style.display =
+            "none";
+        }
+
+        // 모달 Category 입력 포커스 시 드롭다운 표시 (URL로 직접 등록)
         document
           .getElementById("modal-plugin-category")
           .addEventListener("focus", function () {
@@ -1077,9 +1182,39 @@
               "block";
           });
 
+        // 모달 Category 입력 포커스 시 드롭다운 표시 (기본 플러그인 목록에서 등록)
+        modalDefaultPluginCategoryInput.addEventListener("focus", function () {
+          console.log("Modal default category input focused");
+          updateModalDefaultCategoryDropdown();
+          document.getElementById("modal-default-category-dropdown").style.display =
+            "block";
+        });
+
+        // Modal Default Category Dropdown 업데이트
+        function updateModalDefaultCategoryDropdown() {
+          const dropdown = document.getElementById("modal-default-category-dropdown");
+          dropdown.innerHTML = "";
+          const allCategories = Array.from(
+            new Set([...existingCategories, ...existingCategoriesMyPlugins])
+          );
+          console.log("Updating Modal Default Category Dropdown with:", allCategories);
+          allCategories.forEach((category) => {
+            const item = document.createElement("div");
+            item.className = "autocomplete-item";
+            item.textContent = category;
+            item.onclick = () => selectModalDefaultCategory(category);
+            dropdown.appendChild(item);
+          });
+        }
+
+        // 기타 모달 관련 이벤트 핸들러 (모달 외부 클릭 시 닫기)
         document.addEventListener("click", function (e) {
           if (!e.target.closest("#modal-plugin-category")) {
             document.getElementById("modal-category-dropdown").style.display =
+              "none";
+          }
+          if (!e.target.closest("#modal-default-plugin-category")) {
+            document.getElementById("modal-default-category-dropdown").style.display =
               "none";
           }
         });
@@ -1146,48 +1281,8 @@
 
         // 검색 결과에서 플러그인 추가 모달 표시
         function showAddPluginModalWithPlugin(plugin) {
-          selectedPlugin = plugin; // 선택된 플러그인을 저장
-          const modal = document.getElementById("add-plugin-modal");
-          document.getElementById("modal-plugin-name").value =
-            plugin.pluginName;
-          document.getElementById("modal-plugin-url").value = plugin.pluginUrl;
-          document.getElementById("modal-plugin-description").value =
-            plugin.pluginDescription || "";
-          document.getElementById("modal-plugin-category").value = "";
-          modal.style.display = "block";
-          console.log("Add Plugin Modal displayed with plugin:", plugin);
-
-          // 모달의 'Add Plugin' 버튼 클릭 시 핸들러 수정
-          modalAddPluginButton.onclick = function () {
-            const category = document
-              .getElementById("modal-plugin-category")
-              .value.trim();
-            console.log("Confirming add plugin with category:", category);
-
-            if (!category) {
-              showToast("Category is required");
-              console.warn("Category is missing in add plugin confirmation");
-              return;
-            }
-
-            const confirmAddMessage = {
-              type: "confirm-add-plugin",
-              plugin: selectedPlugin,
-              category: category,
-            };
-            console.log(
-              "Sending confirm-add-plugin message:",
-              confirmAddMessage
-            );
-            parent.postMessage(
-              {
-                pluginMessage: confirmAddMessage,
-              },
-              "*"
-            );
-            document.getElementById("add-plugin-modal").style.display = "none";
-            console.log("Add Plugin Modal closed after confirmation");
-          };
+          // 기존 모달을 사용하지 않고, 기본 플러그인 등록용 모달 사용
+          showAddPluginModalDefault(plugin);
         }
 
         // 초기화 시 기본 플러그인 목록 요청
@@ -1214,4 +1309,4 @@
       })();
     </script>
   </body>
-</html>
+  </html>
