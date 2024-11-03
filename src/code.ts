@@ -789,6 +789,64 @@ figma.ui.onmessage = async (msg: {
         { error: true }
       );
     }
+  } else if (msg.type === "add-plugin-default") {
+    // 여기에 'add-plugin-default' 메시지 타입에 대한 처리를 추가합니다.
+    try {
+      if (!msg.url || !msg.category) {
+        throw new Error("URL and category are required");
+      }
+
+      console.log("Attempting to extract plugin info from URL:", msg.url);
+      const pluginInfo = extractPluginInfo(msg.url, msg.category);
+      if (!pluginInfo) {
+        throw new Error("Failed to extract plugin information");
+      }
+      console.log("Successfully extracted plugin info:", pluginInfo);
+
+      const existingPluginIndex = myPluginList.findIndex(
+        (p) => p.id === pluginInfo.id
+      );
+
+      if (existingPluginIndex !== -1) {
+        console.log(
+          "Updating existing plugin:",
+          myPluginList[existingPluginIndex]
+        );
+        if (!myPluginList[existingPluginIndex].categories) {
+          myPluginList[existingPluginIndex].categories = [];
+        }
+        if (
+          !myPluginList[existingPluginIndex].categories.includes(msg.category)
+        ) {
+          myPluginList[existingPluginIndex].categories.push(msg.category);
+        }
+      } else {
+        console.log("Adding new plugin");
+        const newPlugin: PluginInfo = {
+          id: pluginInfo.id,
+          pluginName: pluginInfo.pluginName,
+          pluginDescription: pluginInfo.pluginDescription || "",
+          pluginUrl: pluginInfo.pluginUrl,
+          pluginIcon: pluginInfo.pluginIcon,
+          categories: [msg.category],
+        };
+        myPluginList.push(newPlugin);
+      }
+
+      await saveMyPluginList(myPluginList);
+
+      figma.notify("Plugin added successfully", { timeout: 2000 });
+      figma.ui.postMessage({ type: "plugin-added", plugin: pluginInfo });
+    } catch (error) {
+      console.error("Error adding plugin:", error);
+      figma.notify(
+        "Error adding plugin: " +
+          (error instanceof Error
+            ? error.message
+            : "An unknown error occurred"),
+        { error: true }
+      );
+    }
   } else if (msg.type === "get-plugins") {
     try {
       await syncMyPluginList();
