@@ -1044,5 +1044,5 @@ figma.ui.onmessage = async (msg: {
   } else if (msg.type === "get-default-plugins") {
     console.log("Received get-default-plugins request");
     figma.ui.postMessage({ type: "default-plugins", plugins: defaultPlugins });
-  }
+  } 
 };
