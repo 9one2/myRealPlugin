@@ -4890,7 +4890,12 @@
         );
       }
     } else if (msg.type === "notify") {
-      figma.notify(msg.message || "", { timeout: 2e3 });
+      const { message, error } = msg;
+      if (error) {
+        figma.notify(message || "An error occurred", { error: true });
+      } else {
+        figma.notify(message || "Operation completed successfully");
+      }
     } else if (msg.type === "search-plugins") {
       try {
         console.log("Received search request:", msg.query);
@@ -4982,6 +4987,10 @@
     } else if (msg.type === "get-default-plugins") {
       console.log("Received get-default-plugins request");
       figma.ui.postMessage({ type: "default-plugins", plugins: defaultPlugins });
+    } else if (msg.type === "copy-success") {
+      figma.notify(msg.message || "Copied to clipboard");
+    } else if (msg.type === "copy-failure") {
+      figma.notify(msg.message || "Failed to copy to clipboard", { error: true });
     }
   };
 })();

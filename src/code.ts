@@ -696,7 +696,7 @@ initializePlugin()
     console.error("Error during plugin initialization:", error);
   });
 
-// figma.ui.onmessage 핸들러
+// figma.ui.onmessage 핸들러 통합 및 수정
 figma.ui.onmessage = async (msg: {
   type: string;
   url?: string;
@@ -705,6 +705,7 @@ figma.ui.onmessage = async (msg: {
   description?: string;
   pluginId?: string;
   message?: string;
+  error?: boolean; // 'error' 속성 추가
   width?: number;
   height?: number;
   query?: string;
@@ -790,7 +791,7 @@ figma.ui.onmessage = async (msg: {
       );
     }
   } else if (msg.type === "add-plugin-default") {
-    // 여기에 'add-plugin-default' 메시지 타입에 대한 처리를 추가합니다.
+    // 'add-plugin-default' 메시지 타입 처리
     try {
       if (!msg.url || !msg.category) {
         throw new Error("URL and category are required");
@@ -931,7 +932,12 @@ figma.ui.onmessage = async (msg: {
       );
     }
   } else if (msg.type === "notify") {
-    figma.notify(msg.message || "", { timeout: 2000 });
+    const { message, error } = msg; // 'error' 속성이 이제 정의되어 있습니다.
+    if (error) {
+      figma.notify(message || "An error occurred", { error: true });
+    } else {
+      figma.notify(message || "Operation completed successfully");
+    }
   } else if (msg.type === "search-plugins") {
     try {
       console.log("Received search request:", msg.query);
@@ -1044,5 +1050,11 @@ figma.ui.onmessage = async (msg: {
   } else if (msg.type === "get-default-plugins") {
     console.log("Received get-default-plugins request");
     figma.ui.postMessage({ type: "default-plugins", plugins: defaultPlugins });
-  } 
+  } else if (msg.type === "copy-success") {
+    // 클립보드 복사 성공 시 Figma의 토스트 메시지 표시
+    figma.notify(msg.message || "Copied to clipboard");
+  } else if (msg.type === "copy-failure") {
+    // 클립보드 복사 실패 시 Figma의 에러 토스트 메시지 표시
+    figma.notify(msg.message || "Failed to copy to clipboard", { error: true });
+  }
 };
