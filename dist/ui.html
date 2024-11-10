@@ -405,6 +405,22 @@
     margin-top: 4px;
     display: none;
   }
+  #no-plugins {
+  display: none;
+  text-align: center;
+  margin-top: 40px;
+  }
+
+  #no-plugins > svg {
+  margin-bottom: 16px;
+  color: #A0A0A0;
+  }
+
+  #no-plugins p {
+  font-size: 16px;
+  color: #A0A0A0;
+  }
+
     </style>
     <script src="https://unpkg.com/feather-icons"></script>
   </head>
@@ -490,6 +506,11 @@
           style="display: flex; flex-wrap: wrap; gap: 6px"
         ></div>
         <div id="pluginList"></div>
+        <div id="no-plugins" style="display: none; text-align: center; margin-top: 40px;">  <!-- no data case-->
+          <i data-feather="folder-plus" width="40" height="40"></i>
+          <p style="color: #A0A0A0;">You have no plugins added yet. <br> Add some plugins to get started!</p>
+        </div>
+        
       </div>
     </div>
 
@@ -912,23 +933,6 @@
           console.error("No URL provided for plugin:", pluginId);
         }
       }
-
-      // My Plugin List 렌더링
-      function renderPluginList(plugins) {
-        console.log("Rendering plugin list:", plugins);
-        const pluginList = document.getElementById("pluginList");
-        pluginList.innerHTML = "";
-        myPlugins = plugins; // myPlugins 업데이트
-        renderPluginItems(plugins, "pluginList", "my-plugins");
-        updateExistingCategories(plugins);
-        updateCategoryChips(plugins, "my-plugins");
-
-        // Home 탭의 버튼 상태 업데이트
-        if (currentDisplayedPlugins && currentDisplayedPlugins.length > 0) {
-          renderDefaultPluginList(currentDisplayedPlugins);
-        }
-      }
-
       // Existing Categories 업데이트
       function updateExistingCategories(plugins) {
         existingCategoriesMyPlugins = Array.from(
@@ -939,6 +943,41 @@
           existingCategoriesMyPlugins
         );
       }
+
+
+      // My Plugin List 렌더링
+      function renderPluginList(plugins) {
+        console.log("Rendering plugin list:", plugins);
+        const pluginList = document.getElementById("pluginList");
+        pluginList.innerHTML = "";
+        myPlugins = plugins; // myPlugins 업데이트
+
+        if (plugins.length === 0) {
+          // 플러그인 목록이 비었을 때
+          document.getElementById("no-plugins").style.display = "block";
+          document.getElementById("category-chips-my-plugins").style.display = "none"; // 카테고리 칩 숨기기
+        } else {
+          // 플러그인 목록이 있을 때
+          document.getElementById("no-plugins").style.display = "none";
+
+          updateExistingCategories(plugins);
+          updateCategoryChips(plugins, "my-plugins");
+
+          // 카테고리 칩 표시
+          document.getElementById("category-chips-my-plugins").style.display = "flex";
+
+          renderPluginItems(plugins, "pluginList", "my-plugins");
+
+          // Home 탭의 버튼 상태 업데이트
+          if (currentDisplayedPlugins && currentDisplayedPlugins.length > 0) {
+            renderDefaultPluginList(currentDisplayedPlugins);
+          }
+        }
+
+        // Feather Icons 업데이트
+        feather.replace();
+      }
+
 
       // 검색 기능
       function performSearch() {
